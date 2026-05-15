@@ -49,7 +49,7 @@ public class MyQueue<T> {
 
     private void ensureNotEmpty() {
         if (isEmpty()) {
-            throw new IllegalStateException("Queue is empty");
+            throw new IllegalStateException("Structure is empty");
         }
     }
 

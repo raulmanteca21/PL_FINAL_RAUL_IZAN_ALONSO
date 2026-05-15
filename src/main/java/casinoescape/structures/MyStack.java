@@ -40,7 +40,7 @@ public class MyStack<T> {
 
     private void ensureNotEmpty() {
         if (isEmpty()) {
-            throw new IllegalStateException("Stack is empty");
+            throw new IllegalStateException("Structure is empty");
         }
     }
 
