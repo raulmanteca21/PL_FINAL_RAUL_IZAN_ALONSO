@@ -138,6 +138,38 @@ Valoracion critica: el uso de subagentes ayuda a cumplir AGENTS.md y reduce ries
 Acciones de mejora: registrar el cierre del modulo 6 cuando sus tests pasen en IntelliJ.
 ```
 
+```text
+Fecha: 2026-05-20
+Persona: equipo
+Herramienta o agente: OpenCode / GPT-5.5
+Modulo afectado: modulo 6 - combate, cierre
+Objetivo: implementar sistema basico de combate con formula oficial, adyacencia, muerte, fichas y drop textual del Crupier.
+Prompt usado: peticion de implementar el modulo 6 tras revision con subagentes, sin JavaFX, JSON, inventario real ni IA avanzada.
+Resultado obtenido: Enemy, DamageCalculator, CombatResult, CombatService y tests asociados.
+Cambios aplicados: se implemento dano determinista en tests, ataque jugador-enemigo, ataque enemigo-jugador, vida minima 0, fichas al matar y drop textual "Traje con escudo".
+Cambios rechazados: no se implemento inventario real, tienda, IA enemiga, JSON ni JavaFX.
+Revision humana realizada: tests del modulo 6 ejecutados correctamente en IntelliJ por el equipo.
+Problemas detectados: el drop del Crupier queda como texto hasta el modulo de inventario y objetos.
+Valoracion critica: el modulo cumple combate base y deja pendiente integrar recompensas reales con inventario.
+Acciones de mejora: convertir drops textuales a objetos cuando exista Inventory.
+```
+
+```text
+Fecha: 2026-05-20
+Persona: equipo
+Herramienta o agente: OpenCode / GPT-5.5 con subagentes explore usados como architecture-reviewer, test-planner y structure-reviewer
+Modulo afectado: modulo 7 - inventario y objetos, revision previa
+Objetivo: revisar arquitectura, pruebas y restricciones antes de implementar inventario y objetos.
+Prompt usado: se pidio a subagentes revisar separacion items/model/combat/game, proponer tests JUnit y confirmar uso de MyLinkedList sin estructuras prohibidas.
+Resultado obtenido: recomendaciones para implementar Item, Weapon, Armor, Consumable, KeyItem, Effect e Inventory con MyLinkedList, usando IDs estables y sin tienda ni JavaFX.
+Cambios aplicados: pendiente de implementacion del modulo 7.
+Cambios rechazados: no se aceptan tienda, compra con fichas, JSON, JavaFX, minijuegos ni economia avanzada en este modulo.
+Revision humana realizada: pendiente tras implementar y probar el modulo 7.
+Problemas detectados: CombatService entrega fichas y drop textual; la integracion con inventario real debe hacerse mas adelante desde game.
+Valoracion critica: el uso de subagentes ayuda a proteger la separacion entre items, combat y game.
+Acciones de mejora: registrar el cierre del modulo 7 cuando sus tests pasen en IntelliJ.
+```
+
 ## Prompts Reutilizables
 
 ### Revisar Estructuras
