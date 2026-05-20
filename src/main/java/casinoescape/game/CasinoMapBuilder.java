@@ -1,0 +1,125 @@
+package casinoescape.game;
+
+import casinoescape.model.CasinoMap;
+import casinoescape.model.Cell;
+import casinoescape.model.CellType;
+import casinoescape.model.Door;
+import casinoescape.model.Position;
+import casinoescape.model.Room;
+import casinoescape.structures.MyGraph;
+import casinoescape.structures.MyLinkedList;
+
+public class CasinoMapBuilder {
+    public static final int ROOM_SIZE = 7;
+    public static final int INITIAL_ROOM_ID = 1;
+    public static final String TREASURY_KEY_NAME = "Llave de Tesoreria";
+
+    public CasinoMap buildBaseMap() {
+        MyLinkedList<Room> rooms = createRooms();
+        MyGraph<Integer> graph = createGraph();
+        placeBaseCells(rooms);
+        return new CasinoMap(graph, rooms, INITIAL_ROOM_ID, new Position(3, 3));
+    }
+
+    private MyLinkedList<Room> createRooms() {
+        MyLinkedList<Room> rooms = new MyLinkedList<>();
+        rooms.add(new Room(1, "Hall / Entrada", ROOM_SIZE, ROOM_SIZE));
+        rooms.add(new Room(2, "Tragaperras", ROOM_SIZE, ROOM_SIZE));
+        rooms.add(new Room(3, "Tesoreria / Caja Fuerte", ROOM_SIZE, ROOM_SIZE));
+        rooms.add(new Room(4, "Blackjack", ROOM_SIZE, ROOM_SIZE));
+        rooms.add(new Room(5, "Bar", ROOM_SIZE, ROOM_SIZE));
+        rooms.add(new Room(6, "Zona Privada", ROOM_SIZE, ROOM_SIZE));
+        rooms.add(new Room(7, "Sala VIP", ROOM_SIZE, ROOM_SIZE));
+        rooms.add(new Room(8, "Ruleta / Final", ROOM_SIZE, ROOM_SIZE));
+        return rooms;
+    }
+
+    private MyGraph<Integer> createGraph() {
+        MyGraph<Integer> graph = new MyGraph<>();
+        for (int roomId = 1; roomId <= 8; roomId++) {
+            graph.addNode(roomId);
+        }
+        graph.addUndirectedEdge(1, 2);
+        graph.addUndirectedEdge(1, 4);
+        graph.addUndirectedEdge(2, 3);
+        graph.addUndirectedEdge(2, 5);
+        graph.addUndirectedEdge(4, 5);
+        graph.addUndirectedEdge(4, 6);
+        graph.addUndirectedEdge(5, 6);
+        graph.addUndirectedEdge(5, 7);
+        graph.addUndirectedEdge(7, 8);
+        return graph;
+    }
+
+    private void placeBaseCells(MyLinkedList<Room> rooms) {
+        Room room1 = rooms.get(0);
+        Room room2 = rooms.get(1);
+        Room room3 = rooms.get(2);
+        Room room4 = rooms.get(3);
+        Room room5 = rooms.get(4);
+        Room room6 = rooms.get(5);
+        Room room7 = rooms.get(6);
+        Room room8 = rooms.get(7);
+
+        addObstacles(room1, new Position(1, 1), new Position(1, 5), new Position(5, 1), new Position(5, 5));
+        addObstacles(room2, new Position(1, 1), new Position(1, 3), new Position(1, 5), new Position(3, 3), new Position(5, 1), new Position(5, 5));
+        addObstacles(room3, new Position(1, 1), new Position(1, 5), new Position(3, 3), new Position(5, 1), new Position(5, 5));
+        addObstacles(room4, new Position(1, 2), new Position(1, 4), new Position(3, 3), new Position(5, 2), new Position(5, 4));
+        addObstacles(room5, new Position(1, 1), new Position(1, 5), new Position(3, 1), new Position(3, 5), new Position(5, 3));
+        addObstacles(room6, new Position(1, 1), new Position(1, 5), new Position(3, 3), new Position(5, 1), new Position(5, 5));
+        addObstacles(room7, new Position(1, 2), new Position(1, 4), new Position(3, 1), new Position(3, 5), new Position(5, 3));
+        addObstacles(room8, new Position(1, 1), new Position(1, 5), new Position(3, 3), new Position(5, 1), new Position(5, 5));
+
+        room1.setCellType(new Position(3, 3), CellType.PLAYER);
+        addDoor(room1, new Position(0, 3), 2, false);
+        addDoor(room1, new Position(3, 0), 4, false);
+
+        addDoor(room2, new Position(6, 3), 1, false);
+        addDoor(room2, new Position(0, 3), 3, true);
+        addDoor(room2, new Position(3, 6), 5, false);
+
+        addDoor(room3, new Position(6, 3), 2, false);
+
+        addDoor(room4, new Position(0, 3), 1, false);
+        addDoor(room4, new Position(3, 6), 5, false);
+        addDoor(room4, new Position(6, 3), 6, false);
+
+        addDoor(room5, new Position(3, 0), 2, false);
+        addDoor(room5, new Position(0, 3), 4, false);
+        addDoor(room5, new Position(6, 3), 6, false);
+        addDoor(room5, new Position(3, 6), 7, false);
+
+        addDoor(room6, new Position(0, 3), 4, false);
+        addDoor(room6, new Position(3, 6), 5, false);
+
+        addDoor(room7, new Position(3, 0), 5, false);
+        addDoor(room7, new Position(3, 6), 8, false);
+
+        addDoor(room8, new Position(3, 0), 7, false);
+        room8.setCell(new Position(0, 3), new Cell(CellType.EXIT, "Salida exterior"));
+    }
+
+    private void addDoor(Room room, Position position, int destinationRoomId, boolean locked) {
+        Door door = locked
+                ? new Door(destinationRoomId, true, TREASURY_KEY_NAME)
+                : new Door(destinationRoomId);
+        room.setCell(position, new Cell(door, locked ? "Puerta bloqueada" : "Puerta"));
+    }
+
+    private void addObstacles(Room room, Position first, Position second, Position third, Position fourth) {
+        room.setCellType(first, CellType.OBSTACLE);
+        room.setCellType(second, CellType.OBSTACLE);
+        room.setCellType(third, CellType.OBSTACLE);
+        room.setCellType(fourth, CellType.OBSTACLE);
+    }
+
+    private void addObstacles(Room room, Position first, Position second, Position third, Position fourth, Position fifth) {
+        addObstacles(room, first, second, third, fourth);
+        room.setCellType(fifth, CellType.OBSTACLE);
+    }
+
+    private void addObstacles(Room room, Position first, Position second, Position third, Position fourth, Position fifth, Position sixth) {
+        addObstacles(room, first, second, third, fourth, fifth);
+        room.setCellType(sixth, CellType.OBSTACLE);
+    }
+}

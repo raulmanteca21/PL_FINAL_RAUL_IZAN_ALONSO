@@ -45,6 +45,26 @@ class CellTest {
     }
 
     @Test
+    void doorCellStoresDoorData() {
+        Door door = new Door(2);
+        Cell cell = new Cell(door, "Puerta");
+
+        assertEquals(CellType.DOOR, cell.getType());
+        assertEquals(door, cell.getDoor());
+        assertEquals("Puerta", cell.getLabel());
+    }
+
+    @Test
+    void changingDoorCellToAnotherTypeRemovesDoorData() {
+        Cell cell = new Cell(new Door(2), "Puerta");
+
+        cell.setType(CellType.EMPTY);
+
+        assertEquals(CellType.EMPTY, cell.getType());
+        assertEquals(null, cell.getDoor());
+    }
+
+    @Test
     void nullTypeIsRejected() {
         assertThrows(IllegalArgumentException.class, () -> new Cell(null));
     }
