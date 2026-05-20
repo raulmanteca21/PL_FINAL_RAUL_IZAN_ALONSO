@@ -40,6 +40,24 @@ Valoracion critica: la IA ayudo a estructurar el alcance y reducir complejidad, 
 Acciones de mejora: mantener documentacion actualizada y registrar prompts tecnicos posteriores.
 ```
 
+## Registro De Modulos Implementados
+
+```text
+Fecha: 2026-05-20
+Persona: equipo
+Herramienta o agente: OpenCode / GPT-5.5
+Modulo afectado: modulo 3 - mapa y habitaciones
+Objetivo: implementar el mapa logico del casino segun JUEGO.md y PLAN.md.
+Prompt usado: peticion de iniciar el modulo 3 definido como "Modulo De Mapa Y Habitaciones", respetando grafo definitivo, salas 7x7, puertas, obstaculos, salida exterior y puerta bloqueada entre sala 2 y sala 3.
+Resultado obtenido: CasinoMap, Door, CasinoMapBuilder y tests asociados.
+Cambios aplicados: se represento el grafo con MyGraph, las salas con Room y MyMatrix, las puertas como celdas DOOR, la salida como EXIT, la posicion inicial del jugador y la puerta bloqueada de tesoreria.
+Cambios rechazados: no se implemento JavaFX, JSON, combate, inventario, economia ni movimiento BFS dentro de salas.
+Revision humana realizada: tests del modulo 3 ejecutados correctamente en IntelliJ por el equipo.
+Problemas detectados: Maven no esta disponible en PATH en el entorno del agente; la verificacion JUnit se hizo desde IntelliJ.
+Valoracion critica: el modulo queda cerrado para la base logica del mapa, pero los contenidos avanzados de cada sala quedan para modulos posteriores.
+Acciones de mejora: mantener los tests de mapa al modificar salas, puertas o transiciones.
+```
+
 ## Prompts Reutilizables
 
 ### Revisar Estructuras
