@@ -58,6 +58,22 @@ Valoracion critica: el modulo queda cerrado para la base logica del mapa, pero l
 Acciones de mejora: mantener los tests de mapa al modificar salas, puertas o transiciones.
 ```
 
+```text
+Fecha: 2026-05-20
+Persona: equipo
+Herramienta o agente: OpenCode / GPT-5.5
+Modulo afectado: modulo 4 - movimiento
+Objetivo: implementar movimiento del jugador dentro de salas y calculo de casillas alcanzables con BFS.
+Prompt usado: peticion de iniciar el modulo 4 definido como "Modulo De Movimiento", usando Room, Position, Player, MyQueue y MyLinkedList, sin JavaFX, JSON, combate ni turnos completos.
+Resultado obtenido: Direction, ReachableCellsCalculator, MovementService y tests asociados.
+Cambios aplicados: se implemento BFS ortogonal con MyQueue, validacion de obstaculos y limites, movimiento normal del jugador y movimiento especial en linea recta.
+Cambios rechazados: no se implemento sistema completo de turnos, IA enemiga, combate, inventario, JSON ni JavaFX.
+Revision humana realizada: tests del modulo 4 ejecutados correctamente en IntelliJ por el equipo.
+Problemas detectados: Maven no esta disponible en PATH en el entorno del agente; la verificacion JUnit se hizo desde IntelliJ.
+Valoracion critica: el modulo cumple el movimiento base y deja preparada la integracion con turnos.
+Acciones de mejora: mantener tests de movimiento al introducir enemigos, trampas, puertas y efectos temporales.
+```
+
 ## Prompts Reutilizables
 
 ### Revisar Estructuras
