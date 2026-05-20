@@ -88,6 +88,7 @@ public class CasinoMapBuilder {
         addDoor(room5, new Position(0, 3), 4, false);
         addDoor(room5, new Position(6, 3), 6, false);
         addDoor(room5, new Position(3, 6), 7, false);
+        room5.setCell(new Position(3, 3), new Cell(CellType.SHOP, "Bar interactivo"));
 
         addDoor(room6, new Position(0, 3), 4, false);
         addDoor(room6, new Position(3, 6), 5, false);

@@ -62,6 +62,14 @@ class CasinoMapBuilderTest {
     }
 
     @Test
+    void roomFiveHasInteractiveShopCell() {
+        CasinoMap map = new CasinoMapBuilder().buildBaseMap();
+
+        assertTrue(map.roomHasCellType(5, CellType.SHOP));
+        assertEquals(CellType.SHOP, map.getRoom(5).getCell(new Position(3, 3)).getType());
+    }
+
+    @Test
     void initialPlayerPositionIsDefinedInRoomOne() {
         CasinoMap map = new CasinoMapBuilder().buildBaseMap();
 
