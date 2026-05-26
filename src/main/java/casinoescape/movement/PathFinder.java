@@ -116,9 +116,9 @@ public class PathFinder {
         return new MyLinkedList<>();
     }
 
-    private boolean canVisit(Room room, MyMatrix<Boolean> visited, Position position, Position goal) {
+    private boolean canVisit(Room room, MyMatrix<Boolean> visited, Position position) {
         return !Boolean.TRUE.equals(visited.get(position.getRow(), position.getColumn()))
-                && (room.isWalkable(position) || position.equals(goal));
+                && room.isWalkable(position);
     }
 
     private boolean isInside(Room room, int row, int column) {

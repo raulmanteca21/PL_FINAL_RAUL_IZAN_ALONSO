@@ -55,7 +55,13 @@ public class Cell {
     }
 
     public boolean isWalkable() {
-        return type == CellType.EMPTY;
+        return type == CellType.EMPTY
+                || type == CellType.ITEM
+                || type == CellType.DOOR
+                || type == CellType.TRAP
+                || type == CellType.SHOP
+                || type == CellType.EXIT
+                || type == CellType.MINIGAME;
     }
 
     public boolean isInteractive() {
