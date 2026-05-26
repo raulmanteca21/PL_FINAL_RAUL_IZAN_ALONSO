@@ -13,6 +13,12 @@ public class CasinoMapBuilder {
     public static final int ROOM_SIZE = 7;
     public static final int INITIAL_ROOM_ID = 1;
     public static final String TREASURY_KEY_NAME = "Llave de Tesoreria";
+    public static final Position WELCOME_NPC_POSITION = new Position(3, 5);
+    public static final Position BAR_SPECIAL_NPC_POSITION = new Position(2, 3);
+    public static final Position FRIEND_POSITION = new Position(3, 2);
+    public static final Position DANGEROUS_COMPANION_POSITION = new Position(3, 4);
+    public static final Position RUSSIAN_ROULETTE_POSITION = new Position(3, 4);
+    public static final Position EXIT_POSITION = new Position(0, 3);
 
     public CasinoMap buildBaseMap() {
         MyLinkedList<Room> rooms = createRooms();
@@ -71,6 +77,7 @@ public class CasinoMapBuilder {
         addObstacles(room8, new Position(1, 1), new Position(1, 5), new Position(3, 3), new Position(5, 1), new Position(5, 5));
 
         room1.setCellType(new Position(3, 3), CellType.PLAYER);
+        room1.setCell(WELCOME_NPC_POSITION, new Cell(CellType.NPC, "Recepcionista del casino"));
         addDoor(room1, new Position(0, 3), 2, false);
         addDoor(room1, new Position(3, 0), 4, false);
 
@@ -89,15 +96,19 @@ public class CasinoMapBuilder {
         addDoor(room5, new Position(6, 3), 6, false);
         addDoor(room5, new Position(3, 6), 7, false);
         room5.setCell(new Position(3, 3), new Cell(CellType.SHOP, "Bar interactivo"));
+        room5.setCell(BAR_SPECIAL_NPC_POSITION, new Cell(CellType.NPC, "Cliente sospechoso"));
 
         addDoor(room6, new Position(0, 3), 4, false);
         addDoor(room6, new Position(3, 6), 5, false);
+        room6.setCell(FRIEND_POSITION, new Cell(CellType.NPC, "Amigo borracho"));
+        room6.setCell(DANGEROUS_COMPANION_POSITION, new Cell(CellType.TRAP, "Acompanante peligrosa"));
 
         addDoor(room7, new Position(3, 0), 5, false);
         addDoor(room7, new Position(3, 6), 8, false);
 
         addDoor(room8, new Position(3, 0), 7, false);
-        room8.setCell(new Position(0, 3), new Cell(CellType.EXIT, "Salida exterior"));
+        room8.setCell(RUSSIAN_ROULETTE_POSITION, new Cell(CellType.MINIGAME, "Ruleta rusa"));
+        room8.setCell(EXIT_POSITION, new Cell(CellType.EXIT, "Salida exterior"));
     }
 
     private void addDoor(Room room, Position position, int destinationRoomId, boolean locked) {

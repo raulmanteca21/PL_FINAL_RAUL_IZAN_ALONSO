@@ -70,6 +70,18 @@ class CasinoMapBuilderTest {
     }
 
     @Test
+    void moduleNineInteractiveCellsArePlacedInExpectedRooms() {
+        CasinoMap map = new CasinoMapBuilder().buildBaseMap();
+
+        assertEquals(CellType.NPC, map.getRoom(1).getCell(CasinoMapBuilder.WELCOME_NPC_POSITION).getType());
+        assertEquals(CellType.NPC, map.getRoom(5).getCell(CasinoMapBuilder.BAR_SPECIAL_NPC_POSITION).getType());
+        assertEquals(CellType.NPC, map.getRoom(6).getCell(CasinoMapBuilder.FRIEND_POSITION).getType());
+        assertEquals(CellType.TRAP, map.getRoom(6).getCell(CasinoMapBuilder.DANGEROUS_COMPANION_POSITION).getType());
+        assertEquals(CellType.MINIGAME, map.getRoom(8).getCell(CasinoMapBuilder.RUSSIAN_ROULETTE_POSITION).getType());
+        assertEquals(CellType.EXIT, map.getRoom(8).getCell(CasinoMapBuilder.EXIT_POSITION).getType());
+    }
+
+    @Test
     void initialPlayerPositionIsDefinedInRoomOne() {
         CasinoMap map = new CasinoMapBuilder().buildBaseMap();
 

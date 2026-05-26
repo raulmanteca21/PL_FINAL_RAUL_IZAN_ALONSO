@@ -2,17 +2,30 @@ package casinoescape.game;
 
 import casinoescape.items.Inventory;
 import casinoescape.items.Item;
+import casinoescape.items.Consumable;
+import casinoescape.items.Effect;
+import casinoescape.items.EffectType;
 import casinoescape.items.Shop;
 import casinoescape.logging.GameLog;
 import casinoescape.model.CasinoMap;
 import casinoescape.model.CellType;
 import casinoescape.model.GameState;
+import casinoescape.model.Npc;
 import casinoescape.model.Player;
 import casinoescape.model.Position;
 import casinoescape.model.Room;
+import casinoescape.model.Trap;
 import casinoescape.movement.MovementService;
 
 public class Game {
+    public static final String WELCOME_MESSAGE = "Bienvenido al Casino Fortuna. Si buscas a tu amigo, pregunta en el bar... si sobrevives.";
+    public static final String FRIEND_RESCUED_MESSAGE = "Has encontrado a tu amigo. Ahora puedes intentar salir del casino.";
+    public static final String EXIT_WITHOUT_FRIEND_MESSAGE = "No puedes abandonar el casino sin tu amigo.";
+    public static final String VICTORY_MESSAGE = "Has escapado del casino con tu amigo. Victoria.";
+    public static final String ROULETTE_DECLINED_MESSAGE = "Has rechazado jugar a la ruleta rusa.";
+    public static final int DANGEROUS_COMPANION_DAMAGE_PERCENT = 10;
+    public static final int ROULETTE_REWARD_CHIPS = 5;
+
     private final CasinoMap map;
     private final Player player;
     private final Inventory inventory;
@@ -20,6 +33,10 @@ public class Game {
     private final MovementService movementService;
     private final Shop barShop;
     private final GameLog log;
+    private final Npc welcomeNpc;
+    private final Npc barSpecialNpc;
+    private final Npc friendNpc;
+    private final Trap dangerousCompanion;
 
     public static Game createNewGame(int turnsRemaining) {
         CasinoMap map = new CasinoMapBuilder().buildBaseMap();
@@ -31,11 +48,22 @@ public class Game {
                 new TurnManager(turnsRemaining),
                 new MovementService(),
                 Shop.createDefaultBarShop(),
-                new GameLog());
+                new GameLog(),
+                createWelcomeNpc(),
+                createBarSpecialNpc(),
+                createFriendNpc(),
+                createDangerousCompanion());
     }
 
     public Game(CasinoMap map, Player player, Inventory inventory, TurnManager turnManager,
             MovementService movementService, Shop barShop, GameLog log) {
+        this(map, player, inventory, turnManager, movementService, barShop, log,
+                createWelcomeNpc(), createBarSpecialNpc(), createFriendNpc(), createDangerousCompanion());
+    }
+
+    public Game(CasinoMap map, Player player, Inventory inventory, TurnManager turnManager,
+            MovementService movementService, Shop barShop, GameLog log,
+            Npc welcomeNpc, Npc barSpecialNpc, Npc friendNpc, Trap dangerousCompanion) {
         if (map == null) {
             throw new IllegalArgumentException("Map is required");
         }
@@ -57,6 +85,12 @@ public class Game {
         if (log == null) {
             throw new IllegalArgumentException("Game log is required");
         }
+        if (welcomeNpc == null || barSpecialNpc == null || friendNpc == null) {
+            throw new IllegalArgumentException("Game npcs are required");
+        }
+        if (dangerousCompanion == null) {
+            throw new IllegalArgumentException("Dangerous companion is required");
+        }
         this.map = map;
         this.player = player;
         this.inventory = inventory;
@@ -64,6 +98,10 @@ public class Game {
         this.movementService = movementService;
         this.barShop = barShop;
         this.log = log;
+        this.welcomeNpc = welcomeNpc;
+        this.barSpecialNpc = barSpecialNpc;
+        this.friendNpc = friendNpc;
+        this.dangerousCompanion = dangerousCompanion;
     }
 
     public void movePlayer(Position destination) {
@@ -92,6 +130,124 @@ public class Game {
 
     public boolean canUseDoorTo(int destinationRoomId) {
         return map.canTransition(player.getCurrentRoomId(), destinationRoomId, inventory.hasTreasuryKey());
+    }
+
+    public String interactWelcomeNpc() {
+        requireActionAvailable();
+        requirePlayerInRoom(welcomeNpc.getRoomId());
+        requireAdjacentTo(welcomeNpc.getPosition());
+
+        welcomeNpc.markInteracted();
+        turnManager.registerAction();
+        log.add("NPC bienvenida: " + WELCOME_MESSAGE);
+        return WELCOME_MESSAGE;
+    }
+
+    public Item interactBarSpecialNpc() {
+        requireActionAvailable();
+        requirePlayerInRoom(barSpecialNpc.getRoomId());
+        requireAdjacentTo(barSpecialNpc.getPosition());
+
+        if (barSpecialNpc.hasAlreadyInteracted()) {
+            turnManager.registerAction();
+            log.add("NPC especial del bar ya habia entregado la pastilla");
+            return null;
+        }
+
+        Item suspiciousPill = new Consumable(
+                "SUSPICIOUS_PILL",
+                "Pastilla de dudosa procedencia",
+                new Effect(EffectType.LINE_MOVEMENT, 0, 7));
+        inventory.addItem(suspiciousPill);
+        barSpecialNpc.markInteracted();
+        turnManager.registerAction();
+        log.add("NPC especial del bar entrega Pastilla de dudosa procedencia");
+        return suspiciousPill;
+    }
+
+    public String rescueFriend() {
+        requireActionAvailable();
+        requirePlayerInRoom(friendNpc.getRoomId());
+        requireAdjacentTo(friendNpc.getPosition());
+
+        if (!player.isFriendRescued()) {
+            player.rescueFriend();
+            friendNpc.markInteracted();
+            map.getRoom(friendNpc.getRoomId()).setCellType(friendNpc.getPosition(), CellType.EMPTY);
+            log.add("Amigo rescatado");
+        }
+        turnManager.registerAction();
+        return FRIEND_RESCUED_MESSAGE;
+    }
+
+    public int applyDangerousCompanionEffectIfInRange() {
+        if (player.getCurrentRoomId() != dangerousCompanion.getRoomId()
+                || !isOrthogonallyAdjacent(player.getPosition(), dangerousCompanion.getPosition())) {
+            return 0;
+        }
+
+        int damage = calculateDangerousCompanionDamage();
+        player.setCurrentHealth(player.getCurrentHealth() - damage);
+        log.add("Acompanante peligrosa drena " + damage + " de vida");
+        turnManager.checkDefeatByHealth(player);
+        if (getState() == GameState.DEFEAT) {
+            log.add("Derrota por drenaje de vida");
+        }
+        return damage;
+    }
+
+    public RouletteResult playRussianRoulette(boolean accepts, double randomValue) {
+        requireActionAvailable();
+        requirePlayerInRoom(CasinoMap.EXIT_ROOM_ID);
+        requireAdjacentTo(CasinoMapBuilder.RUSSIAN_ROULETTE_POSITION);
+        validateRandomValue(randomValue);
+
+        if (!accepts) {
+            turnManager.registerAction();
+            log.add(ROULETTE_DECLINED_MESSAGE);
+            return new RouletteResult(false, false, false, 0, 0, ROULETTE_DECLINED_MESSAGE);
+        }
+
+        if (randomValue < 0.5) {
+            player.addChips(ROULETTE_REWARD_CHIPS);
+            turnManager.registerAction();
+            String message = "Resultado favorable de ruleta rusa: ganas " + ROULETTE_REWARD_CHIPS + " fichas";
+            log.add(message);
+            return new RouletteResult(true, true, false, ROULETTE_REWARD_CHIPS, 0, message);
+        }
+
+        int damage = player.getCurrentHealth();
+        player.setCurrentHealth(0);
+        turnManager.registerAction();
+        turnManager.markDefeat();
+        String message = "Resultado desfavorable de ruleta rusa: derrota inmediata";
+        log.add(message);
+        return new RouletteResult(true, false, true, 0, damage, message);
+    }
+
+    public String interactExit() {
+        requireActionAvailable();
+        requirePlayerInRoom(CasinoMap.EXIT_ROOM_ID);
+        requireAdjacentTo(CasinoMapBuilder.EXIT_POSITION);
+
+        if (!player.isFriendRescued()) {
+            turnManager.registerAction();
+            log.add(EXIT_WITHOUT_FRIEND_MESSAGE);
+            return EXIT_WITHOUT_FRIEND_MESSAGE;
+        }
+
+        turnManager.registerAction();
+        turnManager.markVictory();
+        log.add(VICTORY_MESSAGE);
+        return VICTORY_MESSAGE;
+    }
+
+    public void endTurn() {
+        applyDangerousCompanionEffectIfInRange();
+        if (getState() == GameState.IN_PROGRESS) {
+            inventory.decreaseTemporaryEffects(player);
+            turnManager.endTurn(player);
+        }
     }
 
     public void useDoorTo(int destinationRoomId) {
@@ -138,6 +294,22 @@ public class Game {
 
     public GameLog getLog() {
         return log;
+    }
+
+    public Npc getWelcomeNpc() {
+        return welcomeNpc;
+    }
+
+    public Npc getBarSpecialNpc() {
+        return barSpecialNpc;
+    }
+
+    public Npc getFriendNpc() {
+        return friendNpc;
+    }
+
+    public Trap getDangerousCompanion() {
+        return dangerousCompanion;
     }
 
     public Room getCurrentRoom() {
@@ -194,5 +366,64 @@ public class Game {
             return null;
         }
         return new Position(row, column);
+    }
+
+    private void requireActionAvailable() {
+        if (!turnManager.canAct()) {
+            throw new IllegalStateException("Action is not available in this turn");
+        }
+    }
+
+    private void requirePlayerInRoom(int roomId) {
+        if (player.getCurrentRoomId() != roomId) {
+            throw new IllegalStateException("Player is not in the required room");
+        }
+    }
+
+    private void requireAdjacentTo(Position position) {
+        if (!isOrthogonallyAdjacent(player.getPosition(), position)) {
+            throw new IllegalStateException("Player is not adjacent to the target");
+        }
+    }
+
+    private boolean isOrthogonallyAdjacent(Position first, Position second) {
+        int rowDistance = absolute(first.getRow() - second.getRow());
+        int columnDistance = absolute(first.getColumn() - second.getColumn());
+        return rowDistance + columnDistance == 1;
+    }
+
+    private int calculateDangerousCompanionDamage() {
+        int damage = player.getMaxHealth() * dangerousCompanion.getDamagePercent() / 100;
+        return damage <= 0 ? 1 : damage;
+    }
+
+    private int absolute(int value) {
+        return value < 0 ? -value : value;
+    }
+
+    private void validateRandomValue(double randomValue) {
+        if (randomValue < 0.0 || randomValue > 1.0) {
+            throw new IllegalArgumentException("Random value must be between 0 and 1");
+        }
+    }
+
+    private static Npc createWelcomeNpc() {
+        return new Npc(Npc.WELCOME_NPC_ID, "Recepcionista del casino", 1,
+                CasinoMapBuilder.WELCOME_NPC_POSITION, WELCOME_MESSAGE);
+    }
+
+    private static Npc createBarSpecialNpc() {
+        return new Npc(Npc.BAR_SPECIAL_NPC_ID, "Cliente sospechoso", 5,
+                CasinoMapBuilder.BAR_SPECIAL_NPC_POSITION, "Toma esto, pero no preguntes que lleva.");
+    }
+
+    private static Npc createFriendNpc() {
+        return new Npc(Npc.FRIEND_NPC_ID, "Amigo borracho", 6,
+                CasinoMapBuilder.FRIEND_POSITION, FRIEND_RESCUED_MESSAGE);
+    }
+
+    private static Trap createDangerousCompanion() {
+        return new Trap(Trap.DANGEROUS_COMPANION_ID, "Acompanante peligrosa", 6,
+                CasinoMapBuilder.DANGEROUS_COMPANION_POSITION, DANGEROUS_COMPANION_DAMAGE_PERCENT);
     }
 }

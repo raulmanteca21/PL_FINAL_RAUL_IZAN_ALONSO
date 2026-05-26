@@ -80,6 +80,18 @@ public class TurnManager {
         }
     }
 
+    public void markVictory() {
+        if (gameState == GameState.IN_PROGRESS) {
+            gameState = GameState.VICTORY;
+        }
+    }
+
+    public void markDefeat() {
+        if (gameState == GameState.IN_PROGRESS) {
+            gameState = GameState.DEFEAT;
+        }
+    }
+
     public int getTurnsRemaining() {
         return turnsRemaining;
     }
