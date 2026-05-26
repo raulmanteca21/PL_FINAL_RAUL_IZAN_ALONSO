@@ -141,16 +141,23 @@ class InventoryTest {
     }
 
     @Test
-    void suspiciousPillAppliesTemporaryAttackBonus() {
+    void suspiciousPillActivatesLineMovementForSevenTurns() {
         Inventory inventory = new Inventory();
         Player player = player();
-        inventory.addItem(new Consumable("SUSPICIOUS_PILL", "Pastilla de dudosa procedencia", new Effect(EffectType.ATTACK_BONUS, 5, 1)));
+        inventory.addItem(new Consumable("SUSPICIOUS_PILL", "Pastilla de dudosa procedencia", new Effect(EffectType.LINE_MOVEMENT, 0, 7)));
 
         inventory.useConsumable("SUSPICIOUS_PILL", player);
 
-        assertEquals(15, player.getAttack());
+        assertEquals(10, player.getAttack());
+        assertTrue(inventory.hasActiveEffect(EffectType.LINE_MOVEMENT));
+        assertEquals(7, inventory.getActiveEffectTurns(EffectType.LINE_MOVEMENT));
         assertFalse(inventory.containsItemId("SUSPICIOUS_PILL"));
-        inventory.decreaseTemporaryEffects(player);
+
+        for (int i = 0; i < 7; i++) {
+            inventory.decreaseTemporaryEffects(player);
+        }
+
+        assertFalse(inventory.hasActiveEffect(EffectType.LINE_MOVEMENT));
         assertEquals(10, player.getAttack());
     }
 
