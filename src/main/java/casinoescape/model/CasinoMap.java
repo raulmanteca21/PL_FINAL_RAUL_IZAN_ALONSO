@@ -64,6 +64,30 @@ public class CasinoMap {
         return door;
     }
 
+    public Position getDoorPositionTo(int fromRoomId, int toRoomId) {
+        Position position = findDoorPositionTo(fromRoomId, toRoomId);
+        if (position == null) {
+            throw new IllegalArgumentException("Door does not exist from room " + fromRoomId + " to room " + toRoomId);
+        }
+        return position;
+    }
+
+    public Position getFirstCellPositionOfType(int roomId, CellType type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Cell type is required");
+        }
+        Room room = getRoom(roomId);
+        for (int row = 0; row < room.getRows(); row++) {
+            for (int column = 0; column < room.getColumns(); column++) {
+                Position position = new Position(row, column);
+                if (room.getCell(position).getType() == type) {
+                    return position;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Cell type does not exist in room " + roomId + ": " + type);
+    }
+
     public boolean canTransition(int fromRoomId, int toRoomId, boolean hasTreasuryKey) {
         if (!areRoomsConnected(fromRoomId, toRoomId)) {
             return false;
@@ -101,13 +125,22 @@ public class CasinoMap {
     }
 
     private Door findDoorTo(int fromRoomId, int toRoomId) {
+        Position position = findDoorPositionTo(fromRoomId, toRoomId);
+        if (position == null) {
+            return null;
+        }
+        return getRoom(fromRoomId).getCell(position).getDoor();
+    }
+
+    private Position findDoorPositionTo(int fromRoomId, int toRoomId) {
         Room room = getRoom(fromRoomId);
         for (int row = 0; row < room.getRows(); row++) {
             for (int column = 0; column < room.getColumns(); column++) {
-                Cell cell = room.getCell(new Position(row, column));
+                Position position = new Position(row, column);
+                Cell cell = room.getCell(position);
                 Door door = cell.getDoor();
                 if (door != null && door.getDestinationRoomId() == toRoomId) {
-                    return door;
+                    return position;
                 }
             }
         }

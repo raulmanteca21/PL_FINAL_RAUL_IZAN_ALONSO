@@ -2,6 +2,7 @@ package casinoescape.game;
 
 import casinoescape.items.KeyItem;
 import casinoescape.items.Shop;
+import casinoescape.movement.ShortestPathInfo;
 import casinoescape.model.CellType;
 import casinoescape.model.GameState;
 import casinoescape.model.Position;
@@ -78,6 +79,38 @@ class GameTest {
         assertEquals(29, game.getTurnManager().getTurnsRemaining());
         assertFalse(game.getTurnManager().hasActionBeenUsed());
         assertEquals(1, game.getLog().size());
+    }
+
+    @Test
+    void shortestPathInfoIsExposedWithoutChangingGameState() {
+        Game game = Game.createNewGame(30);
+        int turnsBefore = game.getTurnManager().getTurnsRemaining();
+
+        ShortestPathInfo info = game.getShortestPathInfo();
+
+        assertEquals(1, info.getCurrentRoomId());
+        assertEquals(4, info.getRoomDistance());
+        assertEquals(new Position(3, 3), game.getPlayer().getPosition());
+        assertEquals(turnsBefore, game.getTurnManager().getTurnsRemaining());
+        assertFalse(game.getTurnManager().hasActionBeenUsed());
+        assertFalse(game.getTurnManager().hasMovementBeenUsed());
+        assertEquals(0, game.getLog().size());
+    }
+
+    @Test
+    void shortestPathInfoUpdatesAfterRoomChangeAndMovement() {
+        Game game = Game.createNewGame(30);
+        placePlayerInRoom(game, 5, new Position(3, 3));
+
+        ShortestPathInfo fromFive = game.getShortestPathInfo();
+        placePlayerInRoom(game, 7, new Position(3, 5));
+        ShortestPathInfo fromSeven = game.getShortestPathInfo();
+
+        assertEquals(7, fromFive.getRecommendedNextRoomId());
+        assertEquals(2, fromFive.getRoomDistance());
+        assertEquals(8, fromSeven.getRecommendedNextRoomId());
+        assertEquals(1, fromSeven.getRoomDistance());
+        assertEquals(1, fromSeven.getCellDistance());
     }
 
     private void placePlayerInRoom(Game game, int roomId, Position position) {

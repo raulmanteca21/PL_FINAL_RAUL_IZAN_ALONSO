@@ -16,6 +16,8 @@ import casinoescape.model.Position;
 import casinoescape.model.Room;
 import casinoescape.model.Trap;
 import casinoescape.movement.MovementService;
+import casinoescape.movement.PathFinder;
+import casinoescape.movement.ShortestPathInfo;
 
 public class Game {
     public static final String WELCOME_MESSAGE = "Bienvenido al Casino Fortuna. Si buscas a tu amigo, pregunta en el bar... si sobrevives.";
@@ -31,6 +33,7 @@ public class Game {
     private final Inventory inventory;
     private final TurnManager turnManager;
     private final MovementService movementService;
+    private final PathFinder pathFinder;
     private final Shop barShop;
     private final GameLog log;
     private final Npc welcomeNpc;
@@ -47,6 +50,7 @@ public class Game {
                 new Inventory(),
                 new TurnManager(turnsRemaining),
                 new MovementService(),
+                new PathFinder(),
                 Shop.createDefaultBarShop(),
                 new GameLog(),
                 createWelcomeNpc(),
@@ -57,12 +61,12 @@ public class Game {
 
     public Game(CasinoMap map, Player player, Inventory inventory, TurnManager turnManager,
             MovementService movementService, Shop barShop, GameLog log) {
-        this(map, player, inventory, turnManager, movementService, barShop, log,
+        this(map, player, inventory, turnManager, movementService, new PathFinder(), barShop, log,
                 createWelcomeNpc(), createBarSpecialNpc(), createFriendNpc(), createDangerousCompanion());
     }
 
     public Game(CasinoMap map, Player player, Inventory inventory, TurnManager turnManager,
-            MovementService movementService, Shop barShop, GameLog log,
+            MovementService movementService, PathFinder pathFinder, Shop barShop, GameLog log,
             Npc welcomeNpc, Npc barSpecialNpc, Npc friendNpc, Trap dangerousCompanion) {
         if (map == null) {
             throw new IllegalArgumentException("Map is required");
@@ -78,6 +82,9 @@ public class Game {
         }
         if (movementService == null) {
             throw new IllegalArgumentException("Movement service is required");
+        }
+        if (pathFinder == null) {
+            throw new IllegalArgumentException("Path finder is required");
         }
         if (barShop == null) {
             throw new IllegalArgumentException("Bar shop is required");
@@ -96,6 +103,7 @@ public class Game {
         this.inventory = inventory;
         this.turnManager = turnManager;
         this.movementService = movementService;
+        this.pathFinder = pathFinder;
         this.barShop = barShop;
         this.log = log;
         this.welcomeNpc = welcomeNpc;
@@ -130,6 +138,10 @@ public class Game {
 
     public boolean canUseDoorTo(int destinationRoomId) {
         return map.canTransition(player.getCurrentRoomId(), destinationRoomId, inventory.hasTreasuryKey());
+    }
+
+    public ShortestPathInfo getShortestPathInfo() {
+        return pathFinder.calculatePathToExit(map, player, inventory.hasTreasuryKey());
     }
 
     public String interactWelcomeNpc() {
