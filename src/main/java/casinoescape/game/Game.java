@@ -59,6 +59,34 @@ public class Game {
                 createDangerousCompanion());
     }
 
+    public static Npc createWelcomeNpcForRestore(boolean alreadyInteracted) {
+        Npc npc = createWelcomeNpc();
+        if (alreadyInteracted) {
+            npc.markInteracted();
+        }
+        return npc;
+    }
+
+    public static Npc createBarSpecialNpcForRestore(boolean alreadyInteracted) {
+        Npc npc = createBarSpecialNpc();
+        if (alreadyInteracted) {
+            npc.markInteracted();
+        }
+        return npc;
+    }
+
+    public static Npc createFriendNpcForRestore(boolean alreadyInteracted) {
+        Npc npc = createFriendNpc();
+        if (alreadyInteracted) {
+            npc.markInteracted();
+        }
+        return npc;
+    }
+
+    public static Trap createDangerousCompanionForRestore() {
+        return createDangerousCompanion();
+    }
+
     public Game(CasinoMap map, Player player, Inventory inventory, TurnManager turnManager,
             MovementService movementService, Shop barShop, GameLog log) {
         this(map, player, inventory, turnManager, movementService, new PathFinder(), barShop, log,

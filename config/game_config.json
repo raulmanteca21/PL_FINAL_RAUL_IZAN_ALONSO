@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "initialTurns": 30,
+  "initialRoomId": 1,
+  "initialPlayerPosition": {
+    "row": 3,
+    "column": 3
+  },
+  "rooms": [
+    { "id": 1, "name": "Hall / Entrada", "rows": 7, "columns": 7, "cells": [
+      { "row": 3, "column": 3, "type": "PLAYER", "label": "Jugador" },
+      { "row": 3, "column": 5, "type": "NPC", "label": "Recepcionista del casino" },
+      { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 2 },
+      { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 4 },
+      { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
+      { "row": 5, "column": 1, "type": "OBSTACLE" }, { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ] },
+    { "id": 2, "name": "Tragaperras", "rows": 7, "columns": 7, "cells": [
+      { "row": 6, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 1 },
+      { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta bloqueada", "destinationRoomId": 3, "locked": true, "requiredKeyName": "Llave de Tesoreria" },
+      { "row": 3, "column": 6, "type": "DOOR", "label": "Puerta", "destinationRoomId": 5 },
+      { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 3, "type": "OBSTACLE" },
+      { "row": 1, "column": 5, "type": "OBSTACLE" }, { "row": 3, "column": 3, "type": "OBSTACLE" },
+      { "row": 5, "column": 1, "type": "OBSTACLE" }, { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ] },
+    { "id": 3, "name": "Tesoreria / Caja Fuerte", "rows": 7, "columns": 7, "cells": [
+      { "row": 6, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 2 },
+      { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
+      { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 1, "type": "OBSTACLE" },
+      { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ] },
+    { "id": 4, "name": "Blackjack", "rows": 7, "columns": 7, "cells": [
+      { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 1 },
+      { "row": 3, "column": 6, "type": "DOOR", "label": "Puerta", "destinationRoomId": 5 },
+      { "row": 6, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 6 },
+      { "row": 1, "column": 2, "type": "OBSTACLE" }, { "row": 1, "column": 4, "type": "OBSTACLE" },
+      { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 2, "type": "OBSTACLE" },
+      { "row": 5, "column": 4, "type": "OBSTACLE" }
+    ] },
+    { "id": 5, "name": "Bar", "rows": 7, "columns": 7, "cells": [
+      { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 2 },
+      { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 4 },
+      { "row": 6, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 6 },
+      { "row": 3, "column": 6, "type": "DOOR", "label": "Puerta", "destinationRoomId": 7 },
+      { "row": 3, "column": 3, "type": "SHOP", "label": "Bar interactivo" },
+      { "row": 2, "column": 3, "type": "NPC", "label": "Cliente sospechoso" },
+      { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
+      { "row": 3, "column": 1, "type": "OBSTACLE" }, { "row": 3, "column": 5, "type": "OBSTACLE" },
+      { "row": 5, "column": 3, "type": "OBSTACLE" }
+    ] },
+    { "id": 6, "name": "Zona Privada", "rows": 7, "columns": 7, "cells": [
+      { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 4 },
+      { "row": 3, "column": 6, "type": "DOOR", "label": "Puerta", "destinationRoomId": 5 },
+      { "row": 3, "column": 2, "type": "NPC", "label": "Amigo borracho" },
+      { "row": 3, "column": 4, "type": "TRAP", "label": "Acompanante peligrosa" },
+      { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
+      { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 1, "type": "OBSTACLE" },
+      { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ] },
+    { "id": 7, "name": "Sala VIP", "rows": 7, "columns": 7, "cells": [
+      { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 5 },
+      { "row": 3, "column": 6, "type": "DOOR", "label": "Puerta", "destinationRoomId": 8 },
+      { "row": 1, "column": 2, "type": "OBSTACLE" }, { "row": 1, "column": 4, "type": "OBSTACLE" },
+      { "row": 3, "column": 1, "type": "OBSTACLE" }, { "row": 3, "column": 5, "type": "OBSTACLE" },
+      { "row": 5, "column": 3, "type": "OBSTACLE" }
+    ] },
+    { "id": 8, "name": "Ruleta / Final", "rows": 7, "columns": 7, "cells": [
+      { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 7 },
+      { "row": 3, "column": 4, "type": "MINIGAME", "label": "Ruleta rusa" },
+      { "row": 0, "column": 3, "type": "EXIT", "label": "Salida exterior" },
+      { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
+      { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 1, "type": "OBSTACLE" },
+      { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ] }
+  ],
+  "connections": [
+    { "from": 1, "to": 2 },
+    { "from": 1, "to": 4 },
+    { "from": 2, "to": 3 },
+    { "from": 2, "to": 5 },
+    { "from": 4, "to": 5 },
+    { "from": 4, "to": 6 },
+    { "from": 5, "to": 6 },
+    { "from": 5, "to": 7 },
+    { "from": 7, "to": 8 }
+  ],
+  "victory": {
+    "exitRoomId": 8,
+    "requiresFriendRescued": true
+  }
+}

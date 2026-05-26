@@ -20,6 +20,27 @@ public class TurnManager {
         this.gameState = GameState.IN_PROGRESS;
     }
 
+    public static TurnManager restored(int turnsRemaining, boolean movementUsed, boolean actionUsed,
+            boolean enemyPhaseProcessedLastTurn, TurnPhase phase, GameState gameState) {
+        if (turnsRemaining < 0) {
+            throw new IllegalArgumentException("Turns remaining cannot be negative");
+        }
+        if (phase == null) {
+            throw new IllegalArgumentException("Turn phase is required");
+        }
+        if (gameState == null) {
+            throw new IllegalArgumentException("Game state is required");
+        }
+        TurnManager turnManager = new TurnManager(turnsRemaining == 0 ? 1 : turnsRemaining);
+        turnManager.turnsRemaining = turnsRemaining;
+        turnManager.movementUsed = movementUsed;
+        turnManager.actionUsed = actionUsed;
+        turnManager.enemyPhaseProcessedLastTurn = enemyPhaseProcessedLastTurn;
+        turnManager.phase = phase;
+        turnManager.gameState = gameState;
+        return turnManager;
+    }
+
     public boolean canMove() {
         return gameState == GameState.IN_PROGRESS
                 && phase == TurnPhase.PLAYER_TURN

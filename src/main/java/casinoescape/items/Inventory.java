@@ -31,8 +31,16 @@ public class Inventory {
         return items.get(index);
     }
 
+    public Effect getActiveEffect(int index) {
+        return activeEffects.get(index);
+    }
+
     public int size() {
         return items.size();
+    }
+
+    public int activeEffectCount() {
+        return activeEffects.size();
     }
 
     public boolean isEmpty() {
@@ -168,6 +176,37 @@ public class Inventory {
 
     public Armor getEquippedArmor() {
         return equippedArmor;
+    }
+
+    public void restoreActiveEffect(Effect effect) {
+        if (effect == null) {
+            throw new IllegalArgumentException("Effect is required");
+        }
+        activeEffects.add(effect);
+    }
+
+    public void restoreEquippedWeapon(String itemId) {
+        if (itemId == null || itemId.isBlank()) {
+            equippedWeapon = null;
+            return;
+        }
+        Item item = requireExistingItem(itemId);
+        if (!(item instanceof Weapon)) {
+            throw new IllegalArgumentException("Equipped item is not a weapon");
+        }
+        equippedWeapon = (Weapon) item;
+    }
+
+    public void restoreEquippedArmor(String itemId) {
+        if (itemId == null || itemId.isBlank()) {
+            equippedArmor = null;
+            return;
+        }
+        Item item = requireExistingItem(itemId);
+        if (!(item instanceof Armor)) {
+            throw new IllegalArgumentException("Equipped item is not armor");
+        }
+        equippedArmor = (Armor) item;
     }
 
     private void applyEffect(Effect effect, Player player) {
