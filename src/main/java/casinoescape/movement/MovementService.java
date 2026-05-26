@@ -4,6 +4,7 @@ import casinoescape.model.CellType;
 import casinoescape.model.Player;
 import casinoescape.model.Position;
 import casinoescape.model.Room;
+import casinoescape.structures.MyLinkedList;
 
 public class MovementService {
     private final ReachableCellsCalculator reachableCellsCalculator;
@@ -22,6 +23,11 @@ public class MovementService {
     public boolean canMove(Room room, Player player, Position destination) {
         validateRoomAndPlayer(room, player);
         return reachableCellsCalculator.isReachable(room, player.getPosition(), destination, player.getMovementPoints());
+    }
+
+    public MyLinkedList<Position> calculateReachableCells(Room room, Player player) {
+        validateRoomAndPlayer(room, player);
+        return reachableCellsCalculator.calculate(room, player.getPosition(), player.getMovementPoints());
     }
 
     public void movePlayer(Room room, Player player, Position destination) {

@@ -1,0 +1,40 @@
+package casinoescape.ui;
+
+import casinoescape.logging.GameLog;
+import casinoescape.logging.LogEntry;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
+
+public class LogPanelView {
+    private final VBox root = new VBox(6);
+    private final TextArea logArea = new TextArea();
+
+    public LogPanelView() {
+        root.setStyle("-fx-padding: 12; -fx-border-color: #f1c40f; -fx-border-width: 3; -fx-background-color: #fffde7;");
+        Label title = new Label("Mensajes");
+        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+        logArea.setEditable(false);
+        logArea.setWrapText(true);
+        logArea.setPrefHeight(430);
+        root.getChildren().addAll(title, logArea);
+    }
+
+    public Node getNode() {
+        return root;
+    }
+
+    public void refresh(GameLog log) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < log.size(); i++) {
+            LogEntry entry = log.getEntry(i);
+            if (entry.hasTurn()) {
+                builder.append("[").append(entry.getTurn()).append("] ");
+            }
+            builder.append(entry.getMessage()).append(System.lineSeparator());
+        }
+        logArea.setText(builder.toString());
+        logArea.positionCaret(logArea.getText().length());
+    }
+}

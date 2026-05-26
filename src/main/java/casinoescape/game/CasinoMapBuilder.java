@@ -14,6 +14,7 @@ public class CasinoMapBuilder {
     public static final int INITIAL_ROOM_ID = 1;
     public static final String TREASURY_KEY_NAME = "Llave de Tesoreria";
     public static final Position WELCOME_NPC_POSITION = new Position(3, 5);
+    public static final Position BAR_SHOP_POSITION = new Position(3, 3);
     public static final Position BAR_SPECIAL_NPC_POSITION = new Position(2, 3);
     public static final Position FRIEND_POSITION = new Position(3, 2);
     public static final Position DANGEROUS_COMPANION_POSITION = new Position(3, 4);
@@ -95,7 +96,7 @@ public class CasinoMapBuilder {
         addDoor(room5, new Position(0, 3), 4, false);
         addDoor(room5, new Position(6, 3), 6, false);
         addDoor(room5, new Position(3, 6), 7, false);
-        room5.setCell(new Position(3, 3), new Cell(CellType.SHOP, "Bar interactivo"));
+        room5.setCell(BAR_SHOP_POSITION, new Cell(CellType.SHOP, "Bar interactivo"));
         room5.setCell(BAR_SPECIAL_NPC_POSITION, new Cell(CellType.NPC, "Cliente sospechoso"));
 
         addDoor(room6, new Position(0, 3), 4, false);

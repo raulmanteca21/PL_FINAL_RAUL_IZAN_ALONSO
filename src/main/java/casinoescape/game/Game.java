@@ -18,6 +18,7 @@ import casinoescape.model.Trap;
 import casinoescape.movement.MovementService;
 import casinoescape.movement.PathFinder;
 import casinoescape.movement.ShortestPathInfo;
+import casinoescape.structures.MyLinkedList;
 
 public class Game {
     public static final String WELCOME_MESSAGE = "Bienvenido al Casino Fortuna. Si buscas a tu amigo, pregunta en el bar... si sobrevives.";
@@ -164,12 +165,50 @@ public class Game {
         return item;
     }
 
+    public Item buyFromAdjacentBar(String shopItemId) {
+        requireActionAvailable();
+        requirePlayerInRoom(5);
+        requireAdjacentTo(CasinoMapBuilder.BAR_SHOP_POSITION);
+
+        Item item = barShop.buy(shopItemId, player, inventory, log);
+        turnManager.registerAction();
+        return item;
+    }
+
+    public void useItem(String itemId) {
+        requireActionAvailable();
+        Item item = inventory.findById(itemId);
+        inventory.useConsumable(itemId, player);
+        turnManager.registerAction();
+        log.add("Objeto usado: " + item.getName());
+    }
+
+    public void equipWeapon(String itemId) {
+        requireActionAvailable();
+        Item item = inventory.findById(itemId);
+        inventory.equipWeapon(itemId, player);
+        turnManager.registerAction();
+        log.add("Arma equipada: " + item.getName());
+    }
+
+    public void equipArmor(String itemId) {
+        requireActionAvailable();
+        Item item = inventory.findById(itemId);
+        inventory.equipArmor(itemId, player);
+        turnManager.registerAction();
+        log.add("Armadura equipada: " + item.getName());
+    }
+
     public boolean canUseDoorTo(int destinationRoomId) {
         return map.canTransition(player.getCurrentRoomId(), destinationRoomId, inventory.hasTreasuryKey());
     }
 
     public ShortestPathInfo getShortestPathInfo() {
         return pathFinder.calculatePathToExit(map, player, inventory.hasTreasuryKey());
+    }
+
+    public MyLinkedList<Position> getReachableCells() {
+        return movementService.calculateReachableCells(getCurrentRoom(), player);
     }
 
     public String interactWelcomeNpc() {
@@ -310,6 +349,20 @@ public class Game {
         turnManager.registerAction();
         log.add("Cambio de sala " + originRoomId + " -> " + destinationRoomId);
         turnManager.finishTurnAfterRoomChange(player);
+    }
+
+    public void useDoorAt(Position doorPosition) {
+        if (doorPosition == null) {
+            throw new IllegalArgumentException("Door position is required");
+        }
+        Room room = getCurrentRoom();
+        if (!room.isInside(doorPosition) || room.getCell(doorPosition).getDoor() == null) {
+            throw new IllegalStateException("There is no door at the selected position");
+        }
+        if (!isOrthogonallyAdjacent(player.getPosition(), doorPosition)) {
+            throw new IllegalStateException("Player is not adjacent to the door");
+        }
+        useDoorTo(room.getCell(doorPosition).getDoor().getDestinationRoomId());
     }
 
     public CasinoMap getMap() {

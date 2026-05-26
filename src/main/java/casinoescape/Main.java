@@ -1,7 +1,9 @@
 package casinoescape;
 
+import casinoescape.ui.CasinoEscapeApp;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Casino Escape");
+        CasinoEscapeApp.main(args);
     }
 }
