@@ -3,6 +3,7 @@ package casinoescape.persistence;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import casinoescape.exceptions.PersistenceException;
+import casinoescape.game.CasinoMapBuilder;
 import casinoescape.game.Game;
 import casinoescape.items.Armor;
 import casinoescape.items.Consumable;
@@ -12,7 +13,10 @@ import casinoescape.items.Item;
 import casinoescape.items.Weapon;
 import casinoescape.logging.GameLog;
 import casinoescape.logging.LogEntry;
+import casinoescape.model.CasinoMap;
+import casinoescape.model.Enemy;
 import casinoescape.model.Player;
+import casinoescape.model.Room;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,8 +63,8 @@ public class GameSaveWriter {
         data.turn = createTurnData(game);
         data.inventory = createInventoryData(game.getInventory());
         data.interactives = createInteractivesData(game);
-        data.enemies = new PersistenceData.EnemySaveData[0];
-        data.collectedObjectIds = new String[0];
+        data.enemies = createEnemyData(game);
+        data.collectedObjectIds = createCollectedObjectIds(game);
         data.doors = createDoorData(game);
         data.treasuryKeyBought = game.getInventory().hasTreasuryKey();
         data.log = createLogData(game.getLog());
@@ -158,5 +162,87 @@ public class GameSaveWriter {
         data[0].toRoomId = 3;
         data[0].locked = !game.getInventory().hasTreasuryKey();
         return data;
+    }
+
+    private PersistenceData.EnemySaveData[] createEnemyData(Game game) {
+        PersistenceData.EnemySaveData[] data = createBaseEnemySaveData();
+        for (int i = 0; i < data.length; i++) {
+            Room room = game.getMap().getRoom(data[i].roomId);
+            Enemy enemy = room.findEnemyById(data[i].id);
+            if (enemy == null) {
+                data[i].currentHealth = 0;
+                data[i].alive = false;
+                data[i].rewardClaimed = true;
+            } else {
+                data[i].row = enemy.getPosition().getRow();
+                data[i].column = enemy.getPosition().getColumn();
+                data[i].currentHealth = enemy.getCurrentHealth();
+                data[i].alive = enemy.isAlive();
+                data[i].rewardClaimed = enemy.isRewardClaimed();
+            }
+        }
+        return data;
+    }
+
+    private PersistenceData.EnemySaveData[] createBaseEnemySaveData() {
+        PersistenceData.EnemySaveData[] data = new PersistenceData.EnemySaveData[5];
+        data[0] = createEnemySaveData(CasinoMapBuilder.SLOT_MACHINE_ENEMY_ID, 2, 3, 4);
+        data[1] = createEnemySaveData(CasinoMapBuilder.BLACKJACK_DEALER_ENEMY_ID, 4, 3, 2);
+        data[2] = createEnemySaveData(CasinoMapBuilder.DRUNK_ENEMY_ID, 5, 4, 3);
+        data[3] = createEnemySaveData(CasinoMapBuilder.RUSSIAN_MAFIA_ENEMY_ID, 7, 3, 3);
+        data[4] = createEnemySaveData(CasinoMapBuilder.VIP_THUG_ENEMY_ID, 7, 2, 3);
+        return data;
+    }
+
+    private PersistenceData.EnemySaveData createEnemySaveData(String id, int roomId, int row, int column) {
+        PersistenceData.EnemySaveData data = new PersistenceData.EnemySaveData();
+        data.id = id;
+        data.roomId = roomId;
+        data.row = row;
+        data.column = column;
+        data.currentHealth = 0;
+        data.alive = false;
+        data.rewardClaimed = false;
+        return data;
+    }
+
+    private String[] createCollectedObjectIds(Game game) {
+        String[] baseIds = createBaseRoomItemIds();
+        int count = 0;
+        for (int i = 0; i < baseIds.length; i++) {
+            if (!isRoomItemPresent(game, baseIds[i])) {
+                count++;
+            }
+        }
+
+        String[] collected = new String[count];
+        int index = 0;
+        for (int i = 0; i < baseIds.length; i++) {
+            if (!isRoomItemPresent(game, baseIds[i])) {
+                collected[index] = baseIds[i];
+                index++;
+            }
+        }
+        return collected;
+    }
+
+    private boolean isRoomItemPresent(Game game, String itemId) {
+        for (int roomId = 1; roomId <= CasinoMap.EXIT_ROOM_ID; roomId++) {
+            if (game.getMap().getRoom(roomId).findItemPosition(itemId) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String[] createBaseRoomItemIds() {
+        return new String[] {
+                CasinoMapBuilder.BROKEN_BOTTLE_ID,
+                CasinoMapBuilder.TOBACCO_PACK_ID,
+                CasinoMapBuilder.GOLD_SUIT_ID,
+                CasinoMapBuilder.GYPSY_CANE_ID,
+                CasinoMapBuilder.SHARP_CARDS_ID,
+                CasinoMapBuilder.PRIVATE_ROOM_HEAL_ID
+        };
     }
 }

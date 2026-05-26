@@ -86,10 +86,6 @@ public class PathFinder {
             path.add(start);
             return path;
         }
-        if (!room.isWalkable(goal)) {
-            return new MyLinkedList<>();
-        }
-
         MyQueue<CellPathNode> pending = new MyQueue<>();
         MyMatrix<Boolean> visited = new MyMatrix<>(room.getRows(), room.getColumns());
 
@@ -110,7 +106,7 @@ public class PathFinder {
                     continue;
                 }
                 Position next = new Position(nextRow, nextColumn);
-                if (canVisit(room, visited, next)) {
+                if (canVisit(room, visited, next, goal)) {
                     visited.set(next.getRow(), next.getColumn(), Boolean.TRUE);
                     pending.enqueue(new CellPathNode(next, current));
                 }
@@ -120,9 +116,9 @@ public class PathFinder {
         return new MyLinkedList<>();
     }
 
-    private boolean canVisit(Room room, MyMatrix<Boolean> visited, Position position) {
+    private boolean canVisit(Room room, MyMatrix<Boolean> visited, Position position, Position goal) {
         return !Boolean.TRUE.equals(visited.get(position.getRow(), position.getColumn()))
-                && room.isWalkable(position);
+                && (room.isWalkable(position) || position.equals(goal));
     }
 
     private boolean isInside(Room room, int row, int column) {

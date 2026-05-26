@@ -1,6 +1,7 @@
 package casinoescape.model;
 
 public class Enemy {
+    private final String id;
     private final String name;
     private final int maxHealth;
     private int currentHealth;
@@ -11,7 +12,10 @@ public class Enemy {
     private final String dropName;
     private boolean rewardClaimed;
 
-    public Enemy(String name, int maxHealth, int attack, int defense, Position position, int chipReward, String dropName) {
+    public Enemy(String id, String name, int maxHealth, int attack, int defense, Position position, int chipReward, String dropName) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Enemy id is required");
+        }
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Enemy name is required");
         }
@@ -24,6 +28,7 @@ public class Enemy {
         if (position == null) {
             throw new IllegalArgumentException("Enemy position is required");
         }
+        this.id = id;
         this.name = name;
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
@@ -32,6 +37,14 @@ public class Enemy {
         this.position = position;
         this.chipReward = chipReward;
         this.dropName = dropName == null ? "" : dropName;
+    }
+
+    public Enemy(String name, int maxHealth, int attack, int defense, Position position, int chipReward, String dropName) {
+        this(name, name, maxHealth, attack, defense, position, chipReward, dropName);
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {

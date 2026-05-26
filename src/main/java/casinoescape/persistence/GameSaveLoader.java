@@ -21,9 +21,11 @@ import casinoescape.items.Weapon;
 import casinoescape.logging.GameLog;
 import casinoescape.model.CasinoMap;
 import casinoescape.model.CellType;
+import casinoescape.model.Enemy;
 import casinoescape.model.GameState;
 import casinoescape.model.Player;
 import casinoescape.model.Position;
+import casinoescape.model.Room;
 import casinoescape.movement.MovementService;
 import casinoescape.movement.PathFinder;
 
@@ -112,6 +114,8 @@ public class GameSaveLoader {
                 Game.createBarSpecialNpcForRestore(save.interactives.barSpecialNpcInteracted),
                 Game.createFriendNpcForRestore(save.interactives.friendNpcInteracted),
                 Game.createDangerousCompanionForRestore());
+        applyCollectedObjects(map, save.collectedObjectIds);
+        applyEnemies(map, save.enemies);
         placePlayerOnMap(game);
         if (player.isFriendRescued()) {
             map.getRoom(game.getFriendNpc().getRoomId()).setCellType(game.getFriendNpc().getPosition(), CellType.EMPTY);
@@ -183,5 +187,51 @@ public class GameSaveLoader {
         CasinoMap map = game.getMap();
         map.getRoom(map.getInitialRoomId()).setCellType(map.getInitialPlayerPosition(), CellType.EMPTY);
         map.getRoom(game.getPlayer().getCurrentRoomId()).setCellType(game.getPlayer().getPosition(), CellType.PLAYER);
+    }
+
+    private void applyCollectedObjects(CasinoMap map, String[] collectedObjectIds) {
+        if (collectedObjectIds == null) {
+            return;
+        }
+        for (int i = 0; i < collectedObjectIds.length; i++) {
+            removeRoomItem(map, collectedObjectIds[i]);
+        }
+    }
+
+    private void removeRoomItem(CasinoMap map, String itemId) {
+        if (itemId == null || itemId.isBlank()) {
+            return;
+        }
+        for (int roomId = 1; roomId <= CasinoMap.EXIT_ROOM_ID; roomId++) {
+            if (map.getRoom(roomId).removeItemById(itemId)) {
+                return;
+            }
+        }
+    }
+
+    private void applyEnemies(CasinoMap map, PersistenceData.EnemySaveData[] enemies) {
+        if (enemies == null) {
+            return;
+        }
+        for (int i = 0; i < enemies.length; i++) {
+            PersistenceData.EnemySaveData enemyData = enemies[i];
+            Room room = map.getRoom(enemyData.roomId);
+            Enemy enemy = room.findEnemyById(enemyData.id);
+            if (enemy == null) {
+                continue;
+            }
+            if (!enemyData.alive) {
+                room.removeEnemy(enemy);
+                continue;
+            }
+            Position restoredPosition = new Position(enemyData.row, enemyData.column);
+            if (!enemy.getPosition().equals(restoredPosition)) {
+                room.moveEnemy(enemy, restoredPosition);
+            }
+            enemy.setCurrentHealth(enemyData.currentHealth);
+            if (enemyData.rewardClaimed) {
+                enemy.markRewardClaimed();
+            }
+        }
     }
 }

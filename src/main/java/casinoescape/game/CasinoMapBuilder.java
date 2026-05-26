@@ -1,9 +1,15 @@
 package casinoescape.game;
 
+import casinoescape.items.Armor;
+import casinoescape.items.Consumable;
+import casinoescape.items.Effect;
+import casinoescape.items.EffectType;
+import casinoescape.items.Weapon;
 import casinoescape.model.CasinoMap;
 import casinoescape.model.Cell;
 import casinoescape.model.CellType;
 import casinoescape.model.Door;
+import casinoescape.model.Enemy;
 import casinoescape.model.Position;
 import casinoescape.model.Room;
 import casinoescape.structures.MyGraph;
@@ -20,12 +26,35 @@ public class CasinoMapBuilder {
     public static final Position DANGEROUS_COMPANION_POSITION = new Position(3, 4);
     public static final Position RUSSIAN_ROULETTE_POSITION = new Position(3, 4);
     public static final Position EXIT_POSITION = new Position(0, 3);
+    public static final String BROKEN_BOTTLE_ID = "BROKEN_BOTTLE";
+    public static final String TOBACCO_PACK_ID = "TOBACCO_PACK";
+    public static final String GOLD_SUIT_ID = "GOLD_SUIT";
+    public static final String GYPSY_CANE_ID = "GYPSY_CANE";
+    public static final String SHARP_CARDS_ID = "SHARP_CARDS";
+    public static final String SHIELD_SUIT_ID = "SHIELD_SUIT";
+    public static final String PRIVATE_ROOM_HEAL_ID = "REVITALIZING_SHOT";
+    public static final String SLOT_MACHINE_ENEMY_ID = "SLOT_MACHINE_BROKEN";
+    public static final String BLACKJACK_DEALER_ENEMY_ID = "BLACKJACK_DEALER";
+    public static final String DRUNK_ENEMY_ID = "AGGRESSIVE_DRUNK";
+    public static final String RUSSIAN_MAFIA_ENEMY_ID = "RUSSIAN_MAFIA";
+    public static final String VIP_THUG_ENEMY_ID = "VIP_THUG";
 
     public CasinoMap buildBaseMap() {
         MyLinkedList<Room> rooms = createRooms();
         MyGraph<Integer> graph = createGraph();
         placeBaseCells(rooms);
         return new CasinoMap(graph, rooms, INITIAL_ROOM_ID, new Position(3, 3));
+    }
+
+    public void placeBaseDynamicContent(CasinoMap map) {
+        placeBaseDynamicContent(
+                map.getRoom(1),
+                map.getRoom(2),
+                map.getRoom(3),
+                map.getRoom(4),
+                map.getRoom(5),
+                map.getRoom(6),
+                map.getRoom(7));
     }
 
     private MyLinkedList<Room> createRooms() {
@@ -110,6 +139,24 @@ public class CasinoMapBuilder {
         addDoor(room8, new Position(3, 0), 7, false);
         room8.setCell(RUSSIAN_ROULETTE_POSITION, new Cell(CellType.MINIGAME, "Ruleta rusa"));
         room8.setCell(EXIT_POSITION, new Cell(CellType.EXIT, "Salida exterior"));
+
+        placeBaseDynamicContent(room1, room2, room3, room4, room5, room6, room7);
+    }
+
+    private void placeBaseDynamicContent(Room room1, Room room2, Room room3, Room room4, Room room5, Room room6, Room room7) {
+        room1.addItem(new Weapon(BROKEN_BOTTLE_ID, "Botella rota", 3), new Position(3, 4));
+        room2.addEnemy(new Enemy(SLOT_MACHINE_ENEMY_ID, "Maquina Tragaperras Averiada", 35, 7, 2, new Position(3, 4), 4, ""));
+        room2.addItem(new Consumable(TOBACCO_PACK_ID, "Cajetilla de tabaco",
+                new Effect(EffectType.MOVEMENT_BONUS, 1, 4)), new Position(5, 3));
+        room3.addItem(new Armor(GOLD_SUIT_ID, "Traje de oro", 6, 2), new Position(3, 2));
+        room3.addItem(new Weapon(GYPSY_CANE_ID, "Baston gitano", 9), new Position(3, 4));
+        room4.addEnemy(new Enemy(BLACKJACK_DEALER_ENEMY_ID, "Crupier de Blackjack", 45, 9, 4, new Position(3, 2), 6, "Traje con escudo"));
+        room4.addItem(new Weapon(SHARP_CARDS_ID, "Baraja afilada", 5), new Position(3, 4));
+        room5.addEnemy(new Enemy(DRUNK_ENEMY_ID, "Borracho Agresivo", 30, 8, 2, new Position(4, 3), 3, ""));
+        room6.addItem(new Consumable(PRIVATE_ROOM_HEAL_ID, "Chupito revitalizante",
+                new Effect(EffectType.HEAL, 30, 0)), new Position(4, 2));
+        room7.addEnemy(new Enemy(RUSSIAN_MAFIA_ENEMY_ID, "Mafioso Ruso", 65, 12, 5, new Position(3, 3), 8, ""));
+        room7.addEnemy(new Enemy(VIP_THUG_ENEMY_ID, "Maton VIP", 28, 8, 2, new Position(2, 3), 3, ""));
     }
 
     private void addDoor(Room room, Position position, int destinationRoomId, boolean locked) {

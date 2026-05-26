@@ -1,5 +1,11 @@
 package casinoescape.game;
 
+import casinoescape.combat.CombatResult;
+import casinoescape.combat.CombatService;
+import casinoescape.exceptions.InvalidActionException;
+import casinoescape.exceptions.InvalidMoveException;
+import casinoescape.exceptions.LockedDoorException;
+import casinoescape.items.Armor;
 import casinoescape.items.Inventory;
 import casinoescape.items.Item;
 import casinoescape.items.Consumable;
@@ -9,6 +15,7 @@ import casinoescape.items.Shop;
 import casinoescape.logging.GameLog;
 import casinoescape.model.CasinoMap;
 import casinoescape.model.CellType;
+import casinoescape.model.Enemy;
 import casinoescape.model.GameState;
 import casinoescape.model.Npc;
 import casinoescape.model.Player;
@@ -16,7 +23,9 @@ import casinoescape.model.Position;
 import casinoescape.model.Room;
 import casinoescape.model.Trap;
 import casinoescape.movement.MovementService;
+import casinoescape.movement.EnemyMovementService;
 import casinoescape.movement.PathFinder;
+import casinoescape.movement.Direction;
 import casinoescape.movement.ShortestPathInfo;
 import casinoescape.structures.MyLinkedList;
 
@@ -34,7 +43,9 @@ public class Game {
     private final Inventory inventory;
     private final TurnManager turnManager;
     private final MovementService movementService;
+    private final EnemyMovementService enemyMovementService;
     private final PathFinder pathFinder;
+    private final CombatService combatService;
     private final Shop barShop;
     private final GameLog log;
     private final Npc welcomeNpc;
@@ -132,7 +143,9 @@ public class Game {
         this.inventory = inventory;
         this.turnManager = turnManager;
         this.movementService = movementService;
+        this.enemyMovementService = new EnemyMovementService();
         this.pathFinder = pathFinder;
+        this.combatService = new CombatService();
         this.barShop = barShop;
         this.log = log;
         this.welcomeNpc = welcomeNpc;
@@ -144,15 +157,27 @@ public class Game {
     public void movePlayer(Position destination) {
         Room currentRoom = getCurrentRoom();
         if (!turnManager.canMove()) {
-            throw new IllegalStateException("Movement is not available in this turn");
+            throw new InvalidMoveException("Movement is not available in this turn");
         }
         if (!movementService.canMove(currentRoom, player, destination)) {
-            throw new IllegalArgumentException("Destination is not reachable");
+            throw new InvalidMoveException("Destination is not reachable");
         }
 
         movementService.movePlayer(currentRoom, player, destination);
         turnManager.registerMovement();
         log.add("Movimiento del jugador a " + destination.getRow() + "," + destination.getColumn());
+    }
+
+    public void movePlayerInLine(Direction direction) {
+        if (!turnManager.canMove()) {
+            throw new InvalidMoveException("Movement is not available in this turn");
+        }
+        if (!inventory.hasActiveEffect(EffectType.LINE_MOVEMENT)) {
+            throw new InvalidMoveException("No hay efecto activo de movimiento en linea");
+        }
+        movementService.movePlayerInLine(getCurrentRoom(), player, direction);
+        turnManager.registerMovement();
+        log.add("Movimiento especial en linea hacia " + direction.name());
     }
 
     public Item buyFromBar(String shopItemId) {
@@ -199,6 +224,100 @@ public class Game {
         log.add("Armadura equipada: " + item.getName());
     }
 
+    public Item pickUpAdjacentItem() {
+        Position target = findCurrentOrAdjacentItemPosition();
+        if (target == null) {
+            throw new InvalidActionException("No hay objeto adyacente para recoger");
+        }
+        return pickUpItemAt(target);
+    }
+
+    public Item pickUpItemAt(Position position) {
+        requireActionAvailable();
+        requireCurrentOrAdjacentTo(position);
+
+        Item item = getCurrentRoom().removeItemAt(position);
+        if (item == null) {
+            throw new InvalidActionException("No hay objeto en la posicion indicada");
+        }
+        inventory.addItem(item);
+        turnManager.registerAction();
+        log.add("Objeto recogido: " + item.getName());
+        return item;
+    }
+
+    public String interactSimpleAt(Position target) {
+        if (target == null) {
+            throw new InvalidActionException("Interaction target is required");
+        }
+        CellType type = getCurrentRoom().getCell(target).getType();
+        if (type == CellType.DOOR) {
+            useDoorAt(target);
+            return "Puerta usada";
+        }
+        if (type == CellType.ITEM) {
+            return "Has recogido: " + pickUpItemAt(target).getName();
+        }
+        if (type == CellType.EXIT) {
+            return interactExit();
+        }
+        if (type == CellType.TRAP) {
+            return "La acompanante peligrosa se aplica como efecto ambiental al finalizar turno.";
+        }
+        if (type == CellType.NPC) {
+            return interactAdjacentNpc();
+        }
+        throw new InvalidActionException("La interaccion requiere una accion especifica");
+    }
+
+    public String interactAdjacentNpc() {
+        int roomId = player.getCurrentRoomId();
+        if (roomId == 1) {
+            return interactWelcomeNpc();
+        }
+        if (roomId == 5) {
+            Item item = interactBarSpecialNpc();
+            return item == null ? "El NPC ya entrego su objeto." : "Has recibido: " + item.getName();
+        }
+        if (roomId == 6) {
+            return rescueFriend();
+        }
+        throw new InvalidActionException("NPC sin interaccion especial documentada");
+    }
+
+    public CombatResult attackAdjacentEnemy() {
+        Position target = findAdjacentEnemyPosition();
+        if (target == null) {
+            throw new InvalidActionException("No hay enemigo adyacente para atacar");
+        }
+        return attackEnemyAt(target, Math.random());
+    }
+
+    public CombatResult attackEnemyAt(Position position, double randomValue) {
+        requireActionAvailable();
+        requireAdjacentTo(position);
+        validateRandomValue(randomValue);
+
+        Room room = getCurrentRoom();
+        Enemy enemy = room.findEnemyAt(position);
+        if (enemy == null) {
+            throw new InvalidActionException("No hay enemigo en la posicion indicada");
+        }
+
+        CombatResult result = combatService.playerAttacksEnemy(player, enemy, randomValue);
+        log.add("Ataque a " + enemy.getName() + ": " + result.getDamageDealt() + " de dano");
+        if (result.isDefenderDied()) {
+            room.removeEnemy(enemy);
+            log.add("Enemigo derrotado: " + enemy.getName());
+            if (result.getChipsAwarded() > 0) {
+                log.add("Fichas ganadas: " + result.getChipsAwarded());
+            }
+            grantEnemyDrop(result.getDroppedItemName());
+        }
+        turnManager.registerAction();
+        return result;
+    }
+
     public boolean canUseDoorTo(int destinationRoomId) {
         return map.canTransition(player.getCurrentRoomId(), destinationRoomId, inventory.hasTreasuryKey());
     }
@@ -209,6 +328,63 @@ public class Game {
 
     public MyLinkedList<Position> getReachableCells() {
         return movementService.calculateReachableCells(getCurrentRoom(), player);
+    }
+
+    public Position findCurrentOrAdjacentInteractive() {
+        Position current = player.getPosition();
+        if (getCurrentRoom().getCell(current).isInteractive()) {
+            return current;
+        }
+        Position door = findCurrentOrAdjacentCellOfType(CellType.DOOR);
+        if (door != null) {
+            return door;
+        }
+        Position npc = findCurrentOrAdjacentCellOfType(CellType.NPC);
+        if (npc != null) {
+            return npc;
+        }
+        Position item = findCurrentOrAdjacentCellOfType(CellType.ITEM);
+        if (item != null) {
+            return item;
+        }
+        Position shop = findCurrentOrAdjacentCellOfType(CellType.SHOP);
+        if (shop != null) {
+            return shop;
+        }
+        Position exit = findCurrentOrAdjacentCellOfType(CellType.EXIT);
+        if (exit != null) {
+            return exit;
+        }
+        Position minigame = findCurrentOrAdjacentCellOfType(CellType.MINIGAME);
+        if (minigame != null) {
+            return minigame;
+        }
+        return findCurrentOrAdjacentCellOfType(CellType.TRAP);
+    }
+
+    public Position findCurrentOrAdjacentCellOfType(CellType type) {
+        Room room = getCurrentRoom();
+        Position current = player.getPosition();
+        if (room.getCell(current).getType() == type) {
+            return current;
+        }
+        Position up = createPositionIfInside(room, current.getRow() - 1, current.getColumn());
+        if (up != null && room.getCell(up).getType() == type) {
+            return up;
+        }
+        Position down = createPositionIfInside(room, current.getRow() + 1, current.getColumn());
+        if (down != null && room.getCell(down).getType() == type) {
+            return down;
+        }
+        Position left = createPositionIfInside(room, current.getRow(), current.getColumn() - 1);
+        if (left != null && room.getCell(left).getType() == type) {
+            return left;
+        }
+        Position right = createPositionIfInside(room, current.getRow(), current.getColumn() + 1);
+        if (right != null && room.getCell(right).getType() == type) {
+            return right;
+        }
+        return null;
     }
 
     public String interactWelcomeNpc() {
@@ -304,6 +480,10 @@ public class Game {
         return new RouletteResult(true, false, true, 0, damage, message);
     }
 
+    public RouletteResult playRussianRoulette(boolean accepts) {
+        return playRussianRoulette(accepts, accepts ? Math.random() : 0.0);
+    }
+
     public String interactExit() {
         requireActionAvailable();
         requirePlayerInRoom(CasinoMap.EXIT_ROOM_ID);
@@ -322,10 +502,14 @@ public class Game {
     }
 
     public void endTurn() {
-        applyDangerousCompanionEffectIfInRange();
+        if (getState() == GameState.IN_PROGRESS) {
+            processEnemyPhase();
+        }
+        if (getState() == GameState.IN_PROGRESS) {
+            applyDangerousCompanionEffectIfInRange();
+        }
         if (getState() == GameState.IN_PROGRESS) {
             inventory.decreaseTemporaryEffects(player);
-            turnManager.endTurn(player);
         }
     }
 
@@ -336,7 +520,7 @@ public class Game {
         int originRoomId = player.getCurrentRoomId();
         if (!canUseDoorTo(destinationRoomId)) {
             log.add("Intento de abrir puerta bloqueada o invalida desde sala " + originRoomId + " a sala " + destinationRoomId);
-            throw new IllegalStateException("Door cannot be used");
+            throw new LockedDoorException("Door cannot be used");
         }
 
         Room originRoom = getCurrentRoom();
@@ -348,7 +532,7 @@ public class Game {
 
         turnManager.registerAction();
         log.add("Cambio de sala " + originRoomId + " -> " + destinationRoomId);
-        turnManager.finishTurnAfterRoomChange(player);
+        endTurn();
     }
 
     public void useDoorAt(Position doorPosition) {
@@ -357,10 +541,10 @@ public class Game {
         }
         Room room = getCurrentRoom();
         if (!room.isInside(doorPosition) || room.getCell(doorPosition).getDoor() == null) {
-            throw new IllegalStateException("There is no door at the selected position");
+            throw new InvalidActionException("There is no door at the selected position");
         }
         if (!isOrthogonallyAdjacent(player.getPosition(), doorPosition)) {
-            throw new IllegalStateException("Player is not adjacent to the door");
+            throw new InvalidActionException("Player is not adjacent to the door");
         }
         useDoorTo(room.getCell(doorPosition).getDoor().getDestinationRoomId());
     }
@@ -463,19 +647,98 @@ public class Game {
 
     private void requireActionAvailable() {
         if (!turnManager.canAct()) {
-            throw new IllegalStateException("Action is not available in this turn");
+            throw new InvalidActionException("Action is not available in this turn");
         }
     }
 
     private void requirePlayerInRoom(int roomId) {
         if (player.getCurrentRoomId() != roomId) {
-            throw new IllegalStateException("Player is not in the required room");
+            throw new InvalidActionException("Player is not in the required room");
         }
     }
 
     private void requireAdjacentTo(Position position) {
         if (!isOrthogonallyAdjacent(player.getPosition(), position)) {
-            throw new IllegalStateException("Player is not adjacent to the target");
+            throw new InvalidActionException("Player is not adjacent to the target");
+        }
+    }
+
+    private void requireCurrentOrAdjacentTo(Position position) {
+        if (position == null || (!player.getPosition().equals(position) && !isOrthogonallyAdjacent(player.getPosition(), position))) {
+            throw new InvalidActionException("Player is not adjacent to the target");
+        }
+    }
+
+    private Position findCurrentOrAdjacentItemPosition() {
+        return findCurrentOrAdjacentCellOfType(CellType.ITEM);
+    }
+
+    private Position findAdjacentEnemyPosition() {
+        Position current = player.getPosition();
+        Position up = createPositionIfInside(getCurrentRoom(), current.getRow() - 1, current.getColumn());
+        if (up != null && getCurrentRoom().findEnemyAt(up) != null) {
+            return up;
+        }
+        Position down = createPositionIfInside(getCurrentRoom(), current.getRow() + 1, current.getColumn());
+        if (down != null && getCurrentRoom().findEnemyAt(down) != null) {
+            return down;
+        }
+        Position left = createPositionIfInside(getCurrentRoom(), current.getRow(), current.getColumn() - 1);
+        if (left != null && getCurrentRoom().findEnemyAt(left) != null) {
+            return left;
+        }
+        Position right = createPositionIfInside(getCurrentRoom(), current.getRow(), current.getColumn() + 1);
+        if (right != null && getCurrentRoom().findEnemyAt(right) != null) {
+            return right;
+        }
+        return null;
+    }
+
+    private void grantEnemyDrop(String droppedItemName) {
+        if (droppedItemName == null || droppedItemName.isBlank()) {
+            return;
+        }
+        if ("Traje con escudo".equals(droppedItemName)) {
+            Item drop = new Armor(CasinoMapBuilder.SHIELD_SUIT_ID, "Traje con escudo", 4);
+            inventory.addItem(drop);
+            log.add("Objeto obtenido por drop: " + drop.getName());
+        }
+    }
+
+    private void processEnemyPhase() {
+        if (!turnManager.startEnemyPhase(player)) {
+            return;
+        }
+        Room room = getCurrentRoom();
+        for (int i = 0; i < room.enemyCount(); i++) {
+            Enemy enemy = room.getEnemy(i);
+            if (enemy.isAlive()) {
+                processEnemyAction(room, enemy);
+                if (getState() == GameState.DEFEAT || !player.isAlive()) {
+                    break;
+                }
+            }
+        }
+        turnManager.finishEnemyPhase(player);
+        if (getState() == GameState.DEFEAT && !player.isAlive()) {
+            log.add("Derrota por combate enemigo");
+        }
+    }
+
+    private void processEnemyAction(Room room, Enemy enemy) {
+        if (combatService.areAdjacent(enemy.getPosition(), player.getPosition())) {
+            CombatResult result = combatService.enemyAttacksPlayer(enemy, player, Math.random());
+            log.add(enemy.getName() + " ataca al jugador: " + result.getDamageDealt() + " de dano");
+            turnManager.checkDefeatByHealth(player);
+            return;
+        }
+
+        Position destination = enemyMovementService.findNextStepTowards(room, enemy, player.getPosition());
+        if (destination != null) {
+            room.moveEnemy(enemy, destination);
+            log.add(enemy.getName() + " se mueve a " + destination.getRow() + "," + destination.getColumn());
+        } else {
+            log.add(enemy.getName() + " no puede acercarse al jugador");
         }
     }
 

@@ -17,7 +17,7 @@ class GameUiSupportTest {
     void exposesReachableCellsForRoomGridHighlighting() {
         Game game = Game.createNewGame(30);
 
-        assertTrue(game.getReachableCells().contains(new Position(3, 4)));
+        assertTrue(game.getReachableCells().contains(new Position(4, 3)));
         assertFalse(game.getReachableCells().contains(new Position(1, 1)));
     }
 
@@ -73,7 +73,7 @@ class GameUiSupportTest {
     @Test
     void buyFromAdjacentBarBuysWhenAdjacentToShopCell() {
         Game game = Game.createNewGame(30);
-        placePlayerInRoom(game, 5, new Position(2, 3));
+        placePlayerInRoom(game, 5, new Position(3, 2));
         game.getPlayer().addChips(Shop.TREASURY_KEY_PRICE);
 
         game.buyFromAdjacentBar(Shop.TREASURY_KEY_SHOP_ID);

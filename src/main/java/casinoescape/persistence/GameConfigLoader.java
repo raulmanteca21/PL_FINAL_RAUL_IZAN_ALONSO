@@ -48,6 +48,7 @@ public class GameConfigLoader {
         PersistenceData.GameConfigData config = readConfig(path);
         validator.validateConfig(config);
         CasinoMap map = buildMap(config);
+        new CasinoMapBuilder().placeBaseDynamicContent(map);
         Player player = new Player(100, 10, 5, 3, config.initialRoomId,
                 new Position(config.initialPlayerPosition.row, config.initialPlayerPosition.column));
         return new Game(

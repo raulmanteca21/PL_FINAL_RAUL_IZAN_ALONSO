@@ -18,7 +18,7 @@ class GameInteractivesTest {
     @Test
     void welcomeNpcReturnsMessageAndLogsInteraction() {
         Game game = Game.createNewGame(30);
-        placePlayerInRoom(game, 1, new Position(3, 4));
+        placePlayerInRoom(game, 1, new Position(2, 5));
 
         String message = game.interactWelcomeNpc();
 

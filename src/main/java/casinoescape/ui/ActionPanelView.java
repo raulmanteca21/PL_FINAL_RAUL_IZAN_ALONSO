@@ -10,6 +10,7 @@ public class ActionPanelView {
     private final Button endTurn = new Button("Finalizar turno");
     private final Button attack = new Button("Atacar");
     private final Button pickItem = new Button("Recoger");
+    private final Button lineMove = new Button("Movimiento linea");
     private final Button interact = new Button("Interactuar");
     private final Button useDoor = new Button("Usar puerta");
     private final Button useItem = new Button("Usar objeto");
@@ -22,7 +23,7 @@ public class ActionPanelView {
 
     public ActionPanelView() {
         root.setStyle("-fx-padding: 10; -fx-background-color: #eeeeee; -fx-border-color: #222222; -fx-border-width: 2 0 0 0;");
-        root.getChildren().addAll(endTurn, attack, pickItem, interact, useDoor, useItem, equipWeapon, equipArmor, shop, roulette, save, load);
+        root.getChildren().addAll(endTurn, attack, pickItem, lineMove, interact, useDoor, useItem, equipWeapon, equipArmor, shop, roulette, save, load);
     }
 
     public Node getNode() {
@@ -32,6 +33,7 @@ public class ActionPanelView {
     public void setOnEndTurn(Runnable handler) { endTurn.setOnAction(event -> handler.run()); }
     public void setOnAttack(Runnable handler) { attack.setOnAction(event -> handler.run()); }
     public void setOnPickItem(Runnable handler) { pickItem.setOnAction(event -> handler.run()); }
+    public void setOnLineMove(Runnable handler) { lineMove.setOnAction(event -> handler.run()); }
     public void setOnInteract(Runnable handler) { interact.setOnAction(event -> handler.run()); }
     public void setOnUseDoor(Runnable handler) { useDoor.setOnAction(event -> handler.run()); }
     public void setOnUseItem(Runnable handler) { useItem.setOnAction(event -> handler.run()); }
@@ -47,6 +49,7 @@ public class ActionPanelView {
         endTurn.setDisable(finished);
         attack.setDisable(finished);
         pickItem.setDisable(finished);
+        lineMove.setDisable(finished);
         interact.setDisable(finished);
         useDoor.setDisable(finished);
         useItem.setDisable(finished);

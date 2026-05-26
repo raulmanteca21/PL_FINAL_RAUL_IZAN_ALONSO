@@ -90,6 +90,36 @@ public class TurnManager {
         startNextPlayerTurn();
     }
 
+    public boolean startEnemyPhase(Player player) {
+        requirePlayer(player);
+        enemyPhaseProcessedLastTurn = false;
+        if (player.getCurrentHealth() <= 0) {
+            gameState = GameState.DEFEAT;
+            return false;
+        }
+        if (gameState != GameState.IN_PROGRESS) {
+            return false;
+        }
+        phase = TurnPhase.ENEMY_PHASE;
+        return true;
+    }
+
+    public void finishEnemyPhase(Player player) {
+        requirePlayer(player);
+        enemyPhaseProcessedLastTurn = true;
+        if (player.getCurrentHealth() <= 0) {
+            gameState = GameState.DEFEAT;
+            return;
+        }
+        turnsRemaining--;
+        if (turnsRemaining <= 0) {
+            turnsRemaining = 0;
+            gameState = GameState.DEFEAT;
+            return;
+        }
+        startNextPlayerTurn();
+    }
+
     public void finishTurnAfterRoomChange(Player player) {
         endTurn(player);
     }

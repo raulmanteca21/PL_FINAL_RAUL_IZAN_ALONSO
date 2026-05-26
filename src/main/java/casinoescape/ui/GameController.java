@@ -1,9 +1,11 @@
 package casinoescape.ui;
 
+import casinoescape.combat.CombatResult;
 import casinoescape.game.Game;
 import casinoescape.game.RouletteResult;
 import casinoescape.items.Item;
 import casinoescape.items.ShopItem;
+import casinoescape.movement.Direction;
 import casinoescape.model.Cell;
 import casinoescape.model.CellType;
 import casinoescape.model.GameState;
@@ -76,8 +78,9 @@ public class GameController {
     private void connectEvents() {
         roomGridView.setOnCellClicked(this::handleCellClick);
         actionPanelView.setOnEndTurn(this::handleEndTurn);
-        actionPanelView.setOnAttack(() -> showInfo("Combate", "Selecciona un enemigo adyacente cuando la logica de enemigos este integrada."));
-        actionPanelView.setOnPickItem(() -> showInfo("Recoger", "La recogida de objetos de sala queda pendiente de integracion logica."));
+        actionPanelView.setOnAttack(this::handleAttack);
+        actionPanelView.setOnPickItem(this::handlePickItem);
+        actionPanelView.setOnLineMove(this::handleLineMove);
         actionPanelView.setOnInteract(this::handleInteract);
         actionPanelView.setOnUseDoor(this::handleUseDoor);
         actionPanelView.setOnUseItem(this::handleUseItem);
@@ -92,7 +95,7 @@ public class GameController {
     private void handleCellClick(Position position) {
         try {
             Cell cell = game.getCurrentRoom().getCell(position);
-            if (cell.getType() == CellType.DOOR && game.getReachableCells().contains(position)) {
+            if (cell.getType() == CellType.DOOR) {
                 game.useDoorAt(position);
             } else {
                 game.movePlayer(position);
@@ -107,6 +110,44 @@ public class GameController {
         try {
             game.endTurn();
             refreshAll();
+        } catch (RuntimeException exception) {
+            showError(exception);
+        }
+    }
+
+    private void handleAttack() {
+        try {
+            CombatResult result = game.attackAdjacentEnemy();
+            refreshAll();
+            String message = result.isDefenderDied()
+                    ? "Enemigo derrotado. Dano: " + result.getDamageDealt()
+                    : "Dano causado: " + result.getDamageDealt();
+            showInfo("Combate", message);
+        } catch (RuntimeException exception) {
+            showError(exception);
+        }
+    }
+
+    private void handlePickItem() {
+        try {
+            Item item = game.pickUpAdjacentItem();
+            refreshAll();
+            showInfo("Recoger", "Has recogido: " + item.getName());
+        } catch (RuntimeException exception) {
+            showError(exception);
+        }
+    }
+
+    private void handleLineMove() {
+        try {
+            ChoiceDialog<String> dialog = new ChoiceDialog<>("UP", "UP", "DOWN", "LEFT", "RIGHT");
+            dialog.setTitle("Movimiento en linea");
+            dialog.setHeaderText("Elige una direccion ortogonal");
+            Optional<String> selected = dialog.showAndWait();
+            if (selected.isPresent()) {
+                game.movePlayerInLine(Direction.valueOf(selected.get()));
+                refreshAll();
+            }
         } catch (RuntimeException exception) {
             showError(exception);
         }
@@ -179,9 +220,6 @@ public class GameController {
 
     private void handleOpenShop() {
         try {
-            if (game.getPlayer().getCurrentRoomId() != 5) {
-                throw new IllegalStateException("La tienda esta en la sala 5");
-            }
             ChoiceDialog<String> dialog = new ChoiceDialog<>();
             dialog.setTitle("Bar / Tienda");
             dialog.setHeaderText("Compra con fichas de casino");
@@ -211,7 +249,7 @@ public class GameController {
             confirmation.setContentText("Puedes rechazarlo. Si aceptas, puede darte fichas o causarte derrota inmediata.");
             Optional<ButtonType> result = confirmation.showAndWait();
             boolean accepts = result.isPresent() && result.get() == ButtonType.OK;
-            RouletteResult rouletteResult = game.playRussianRoulette(accepts, accepts ? Math.random() : 0.0);
+            RouletteResult rouletteResult = game.playRussianRoulette(accepts);
             refreshAll();
             showInfo("Ruleta rusa", rouletteResult.getMessage());
         } catch (RuntimeException exception) {
@@ -242,95 +280,21 @@ public class GameController {
 
     private void interactWith(Position target) {
         Cell cell = game.getCurrentRoom().getCell(target);
-        if (cell.getType() == CellType.DOOR) {
-            game.useDoorAt(target);
-        } else if (cell.getType() == CellType.SHOP) {
+        if (cell.getType() == CellType.SHOP) {
             handleOpenShop();
         } else if (cell.getType() == CellType.MINIGAME) {
             handleRussianRoulette();
-        } else if (cell.getType() == CellType.EXIT) {
-            showInfo("Salida", game.interactExit());
-        } else if (cell.getType() == CellType.TRAP) {
-            showInfo("Trampa", "La acompanante peligrosa se aplica como efecto ambiental al finalizar turno.");
-        } else if (cell.getType() == CellType.NPC) {
-            interactWithNpc();
         } else {
-            throw new IllegalStateException("La celda seleccionada no tiene interaccion disponible");
-        }
-    }
-
-    private void interactWithNpc() {
-        int roomId = game.getPlayer().getCurrentRoomId();
-        if (roomId == 1) {
-            showInfo("NPC", game.interactWelcomeNpc());
-        } else if (roomId == 5) {
-            Item item = game.interactBarSpecialNpc();
-            showInfo("NPC", item == null ? "El NPC ya entrego su objeto." : "Has recibido: " + item.getName());
-        } else if (roomId == 6) {
-            showInfo("Amigo", game.rescueFriend());
-        } else {
-            throw new IllegalStateException("NPC sin interaccion especial documentada");
+            showInfo("Interaccion", game.interactSimpleAt(target));
         }
     }
 
     private Position findCurrentOrAdjacentInteractive() {
-        Position current = game.getPlayer().getPosition();
-        if (game.getCurrentRoom().getCell(current).isInteractive()) {
-            return current;
-        }
-        Position door = findCurrentOrAdjacentCellOfType(CellType.DOOR);
-        if (door != null) {
-            return door;
-        }
-        Position npc = findCurrentOrAdjacentCellOfType(CellType.NPC);
-        if (npc != null) {
-            return npc;
-        }
-        Position shop = findCurrentOrAdjacentCellOfType(CellType.SHOP);
-        if (shop != null) {
-            return shop;
-        }
-        Position exit = findCurrentOrAdjacentCellOfType(CellType.EXIT);
-        if (exit != null) {
-            return exit;
-        }
-        Position minigame = findCurrentOrAdjacentCellOfType(CellType.MINIGAME);
-        if (minigame != null) {
-            return minigame;
-        }
-        return findCurrentOrAdjacentCellOfType(CellType.TRAP);
+        return game.findCurrentOrAdjacentInteractive();
     }
 
     private Position findCurrentOrAdjacentCellOfType(CellType type) {
-        Room room = game.getCurrentRoom();
-        Position current = game.getPlayer().getPosition();
-        if (room.getCell(current).getType() == type) {
-            return current;
-        }
-        Position up = positionIfInside(current.getRow() - 1, current.getColumn());
-        if (up != null && room.getCell(up).getType() == type) {
-            return up;
-        }
-        Position down = positionIfInside(current.getRow() + 1, current.getColumn());
-        if (down != null && room.getCell(down).getType() == type) {
-            return down;
-        }
-        Position left = positionIfInside(current.getRow(), current.getColumn() - 1);
-        if (left != null && room.getCell(left).getType() == type) {
-            return left;
-        }
-        Position right = positionIfInside(current.getRow(), current.getColumn() + 1);
-        if (right != null && room.getCell(right).getType() == type) {
-            return right;
-        }
-        return null;
-    }
-
-    private Position positionIfInside(int row, int column) {
-        if (row < 0 || column < 0 || row >= game.getCurrentRoom().getRows() || column >= game.getCurrentRoom().getColumns()) {
-            return null;
-        }
-        return new Position(row, column);
+        return game.findCurrentOrAdjacentCellOfType(type);
     }
 
     private Item requireSelectedItem() {

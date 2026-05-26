@@ -88,7 +88,7 @@ class PersistenceJsonTest {
     @Test
     void saveAndLoadRestoresCurrentRoomPositionStatsChipsFriendAndLog() {
         Game game = Game.createNewGame(30);
-        placePlayerInRoom(game, 5, new Position(3, 3));
+        placePlayerInRoom(game, 5, new Position(4, 4));
         game.getPlayer().setCurrentHealth(72);
         game.getPlayer().addChips(Shop.TREASURY_KEY_PRICE);
         game.buyFromBar(Shop.TREASURY_KEY_SHOP_ID);
@@ -100,7 +100,7 @@ class PersistenceJsonTest {
         Game loaded = new GameSaveLoader().load(savePath);
 
         assertEquals(5, loaded.getPlayer().getCurrentRoomId());
-        assertEquals(new Position(3, 3), loaded.getPlayer().getPosition());
+        assertEquals(new Position(4, 4), loaded.getPlayer().getPosition());
         assertEquals(72, loaded.getPlayer().getCurrentHealth());
         assertEquals(0, loaded.getPlayer().getChips());
         assertTrue(loaded.getInventory().hasTreasuryKey());
@@ -134,7 +134,7 @@ class PersistenceJsonTest {
     @Test
     void saveAndLoadPreservesTurnStateAndGameState() {
         Game game = Game.createNewGame(30);
-        game.movePlayer(new Position(3, 4));
+        game.movePlayer(new Position(4, 3));
         Path savePath = tempDir.resolve("turn_save.json");
 
         new GameSaveWriter().save(game, savePath);
@@ -163,23 +163,27 @@ class PersistenceJsonTest {
     }
 
     @Test
-    void loadSaveWithUnsupportedEnemyStateThrowsInvalidConfigurationException() throws Exception {
-        Path invalid = tempDir.resolve("enemy_save.json");
-        Files.writeString(invalid, validSavePrefix()
-                + ",\"enemies\":[{\"id\":\"SLOT_MACHINE\",\"roomId\":2,\"row\":2,\"column\":2,\"currentHealth\":0,\"alive\":false,\"rewardClaimed\":true}],"
+    void loadSaveWithEnemyStateIsSupported() throws Exception {
+        Path valid = tempDir.resolve("enemy_save.json");
+        Files.writeString(valid, validSavePrefix()
+                + ",\"enemies\":[{\"id\":\"SLOT_MACHINE_BROKEN\",\"roomId\":2,\"row\":3,\"column\":4,\"currentHealth\":0,\"alive\":false,\"rewardClaimed\":true}],"
                 + "\"collectedObjectIds\":[],\"doors\":[],\"treasuryKeyBought\":false,\"log\":[]}");
 
-        assertThrows(InvalidConfigurationException.class, () -> new GameSaveLoader().load(invalid));
+        Game loaded = new GameSaveLoader().load(valid);
+
+        assertEquals(0, loaded.getMap().getRoom(2).enemyCount());
     }
 
     @Test
-    void loadSaveWithUnsupportedCollectedObjectsThrowsInvalidConfigurationException() throws Exception {
-        Path invalid = tempDir.resolve("objects_save.json");
-        Files.writeString(invalid, validSavePrefix()
+    void loadSaveWithCollectedObjectsIsSupported() throws Exception {
+        Path valid = tempDir.resolve("objects_save.json");
+        Files.writeString(valid, validSavePrefix()
                 + ",\"enemies\":[],\"collectedObjectIds\":[\"BROKEN_BOTTLE\"],"
                 + "\"doors\":[],\"treasuryKeyBought\":false,\"log\":[]}");
 
-        assertThrows(InvalidConfigurationException.class, () -> new GameSaveLoader().load(invalid));
+        Game loaded = new GameSaveLoader().load(valid);
+
+        assertEquals(null, loaded.getMap().getRoom(1).findItemPosition("BROKEN_BOTTLE"));
     }
 
     @Test

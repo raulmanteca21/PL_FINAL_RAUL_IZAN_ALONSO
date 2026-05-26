@@ -55,17 +55,62 @@ public class JsonValidator {
         if (save.interactives == null) {
             throw new InvalidConfigurationException("Interactives data is required");
         }
-        validateUnsupportedStateArrays(save.enemies, save.collectedObjectIds);
+        validateEnemies(save.enemies, map);
+        validateCollectedObjectIds(save.collectedObjectIds);
         validateDoors(save.doors);
         validateLog(save.log);
     }
 
-    private void validateUnsupportedStateArrays(PersistenceData.EnemySaveData[] enemies, String[] collectedObjectIds) {
-        if (enemies != null && enemies.length > 0) {
-            throw new InvalidConfigurationException("Enemy persistence is not supported until rooms store enemies");
+    private void validateEnemies(PersistenceData.EnemySaveData[] enemies, CasinoMap map) {
+        if (enemies == null) {
+            return;
         }
-        if (collectedObjectIds != null && collectedObjectIds.length > 0) {
-            throw new InvalidConfigurationException("Collected object persistence is not supported until rooms store objects");
+        for (int i = 0; i < enemies.length; i++) {
+            PersistenceData.EnemySaveData enemy = enemies[i];
+            if (enemy == null || enemy.id == null || enemy.id.isBlank()) {
+                throw new InvalidConfigurationException("Enemy save data is invalid");
+            }
+            Room room;
+            try {
+                room = map.getRoom(enemy.roomId);
+            } catch (IllegalArgumentException exception) {
+                throw new InvalidConfigurationException("Enemy room does not exist", exception);
+            }
+            if (!room.isInside(new Position(enemy.row, enemy.column))) {
+                throw new InvalidConfigurationException("Enemy position is outside room");
+            }
+            if (enemy.currentHealth < 0) {
+                throw new InvalidConfigurationException("Enemy health is invalid");
+            }
+            if (!isKnownEnemyState(enemy)) {
+                throw new InvalidConfigurationException("Enemy save data does not match base enemies");
+            }
+            if (enemy.alive && enemy.currentHealth <= 0) {
+                throw new InvalidConfigurationException("Alive enemy must have positive health");
+            }
+        }
+    }
+
+    private boolean isKnownEnemyState(PersistenceData.EnemySaveData enemy) {
+        return isEnemy(enemy, CasinoMapBuilder.SLOT_MACHINE_ENEMY_ID, 2)
+                || isEnemy(enemy, CasinoMapBuilder.BLACKJACK_DEALER_ENEMY_ID, 4)
+                || isEnemy(enemy, CasinoMapBuilder.DRUNK_ENEMY_ID, 5)
+                || isEnemy(enemy, CasinoMapBuilder.RUSSIAN_MAFIA_ENEMY_ID, 7)
+                || isEnemy(enemy, CasinoMapBuilder.VIP_THUG_ENEMY_ID, 7);
+    }
+
+    private boolean isEnemy(PersistenceData.EnemySaveData enemy, String id, int roomId) {
+        return id.equals(enemy.id) && enemy.roomId == roomId;
+    }
+
+    private void validateCollectedObjectIds(String[] collectedObjectIds) {
+        if (collectedObjectIds == null) {
+            return;
+        }
+        for (int i = 0; i < collectedObjectIds.length; i++) {
+            if (collectedObjectIds[i] == null || collectedObjectIds[i].isBlank()) {
+                throw new InvalidConfigurationException("Collected object id is invalid");
+            }
         }
     }
 

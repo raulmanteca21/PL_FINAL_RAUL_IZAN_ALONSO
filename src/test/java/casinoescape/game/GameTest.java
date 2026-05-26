@@ -28,7 +28,7 @@ class GameTest {
     @Test
     void gameMovesPlayerUsingMovementServiceAndLogsIt() {
         Game game = Game.createNewGame(30);
-        Position destination = new Position(3, 4);
+        Position destination = new Position(4, 3);
 
         game.movePlayer(destination);
 
@@ -100,7 +100,7 @@ class GameTest {
     @Test
     void shortestPathInfoUpdatesAfterRoomChangeAndMovement() {
         Game game = Game.createNewGame(30);
-        placePlayerInRoom(game, 5, new Position(3, 3));
+        placePlayerInRoom(game, 5, new Position(4, 4));
 
         ShortestPathInfo fromFive = game.getShortestPathInfo();
         placePlayerInRoom(game, 7, new Position(3, 5));

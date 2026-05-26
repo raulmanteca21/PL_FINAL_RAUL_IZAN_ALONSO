@@ -36,6 +36,7 @@ public class Cell {
             throw new IllegalArgumentException("Cell type is required");
         }
         this.type = type;
+        this.label = "";
         if (type != CellType.DOOR) {
             this.door = null;
         }
@@ -54,13 +55,7 @@ public class Cell {
     }
 
     public boolean isWalkable() {
-        return type == CellType.EMPTY
-                || type == CellType.ITEM
-                || type == CellType.DOOR
-                || type == CellType.TRAP
-                || type == CellType.SHOP
-                || type == CellType.EXIT
-                || type == CellType.MINIGAME;
+        return type == CellType.EMPTY;
     }
 
     public boolean isInteractive() {
