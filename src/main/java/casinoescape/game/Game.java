@@ -35,6 +35,10 @@ public class Game {
     public static final String EXIT_WITHOUT_FRIEND_MESSAGE = "No puedes abandonar el casino sin tu amigo.";
     public static final String VICTORY_MESSAGE = "Has escapado del casino con tu amigo. Victoria.";
     public static final String ROULETTE_DECLINED_MESSAGE = "Has rechazado jugar a la ruleta rusa.";
+    public static final int INITIAL_HEALTH = 20;
+    public static final int INITIAL_ATTACK = 4;
+    public static final int INITIAL_DEFENSE = 0;
+    public static final int INITIAL_MOVEMENT = 3;
     public static final int DANGEROUS_COMPANION_DAMAGE_PERCENT = 10;
     public static final int ROULETTE_REWARD_CHIPS = 5;
 
@@ -55,7 +59,8 @@ public class Game {
 
     public static Game createNewGame(int turnsRemaining) {
         CasinoMap map = new CasinoMapBuilder().buildBaseMap();
-        Player player = new Player(100, 10, 5, 3, map.getInitialRoomId(), map.getInitialPlayerPosition());
+        Player player = new Player(INITIAL_HEALTH, INITIAL_ATTACK, INITIAL_DEFENSE, INITIAL_MOVEMENT,
+                map.getInitialRoomId(), map.getInitialPlayerPosition());
         return new Game(
                 map,
                 player,
@@ -163,7 +168,11 @@ public class Game {
             throw new InvalidMoveException("Destination is not reachable");
         }
 
+        boolean activatesTrap = currentRoom.getCell(destination).getType() == CellType.TRAP;
         movementService.movePlayer(currentRoom, player, destination);
+        if (activatesTrap) {
+            applyTrapDamage(destination);
+        }
         turnManager.registerMovement();
         log.add("Movimiento del jugador a " + destination.getRow() + "," + destination.getColumn());
     }
@@ -175,7 +184,18 @@ public class Game {
         if (!inventory.hasActiveEffect(EffectType.LINE_MOVEMENT)) {
             throw new InvalidMoveException("No hay efecto activo de movimiento en linea");
         }
-        movementService.movePlayerInLine(getCurrentRoom(), player, direction);
+        Room currentRoom = getCurrentRoom();
+        Position origin = player.getPosition();
+        Position destination = movementService.calculateLineDestination(currentRoom, origin, direction);
+        MyLinkedList<Position> traps = findTrapsInLine(currentRoom, origin, destination, direction);
+        movementService.movePlayerInLine(currentRoom, player, direction);
+        for (int i = 0; i < traps.size(); i++) {
+            Position trapPosition = traps.get(i);
+            if (!trapPosition.equals(player.getPosition())) {
+                currentRoom.setCellType(trapPosition, CellType.EMPTY);
+            }
+            applyTrapDamage(trapPosition);
+        }
         turnManager.registerMovement();
         log.add("Movimiento especial en linea hacia " + direction.name());
     }
@@ -235,12 +255,15 @@ public class Game {
     public Item pickUpItemAt(Position position) {
         requireActionAvailable();
         requireCurrentOrAdjacentTo(position);
+        if (inventory.isFull()) {
+            throw new InvalidActionException("Inventory is full");
+        }
 
         Item item = getCurrentRoom().removeItemAt(position);
         if (item == null) {
             throw new InvalidActionException("No hay objeto en la posicion indicada");
         }
-        inventory.addItem(item);
+        inventory.addItem(item, player);
         turnManager.registerAction();
         log.add("Objeto recogido: " + item.getName());
         return item;
@@ -290,7 +313,7 @@ public class Game {
         if (target == null) {
             throw new InvalidActionException("No hay enemigo adyacente para atacar");
         }
-        return attackEnemyAt(target, Math.random());
+        return attackEnemyAt(target, nextRandomValue());
     }
 
     public CombatResult attackEnemyAt(Position position, double randomValue) {
@@ -413,7 +436,7 @@ public class Game {
                 "SUSPICIOUS_PILL",
                 "Pastilla de dudosa procedencia",
                 new Effect(EffectType.LINE_MOVEMENT, 0, 7));
-        inventory.addItem(suspiciousPill);
+        inventory.addItem(suspiciousPill, player);
         barSpecialNpc.markInteracted();
         turnManager.registerAction();
         log.add("NPC especial del bar entrega Pastilla de dudosa procedencia");
@@ -437,6 +460,7 @@ public class Game {
 
     public int applyDangerousCompanionEffectIfInRange() {
         if (player.getCurrentRoomId() != dangerousCompanion.getRoomId()
+                || getCurrentRoom().getCell(dangerousCompanion.getPosition()).getType() != CellType.TRAP
                 || !isOrthogonallyAdjacent(player.getPosition(), dangerousCompanion.getPosition())) {
             return 0;
         }
@@ -481,7 +505,7 @@ public class Game {
     }
 
     public RouletteResult playRussianRoulette(boolean accepts) {
-        return playRussianRoulette(accepts, accepts ? Math.random() : 0.0);
+        return playRussianRoulette(accepts, accepts ? nextRandomValue() : 0.0);
     }
 
     public String interactExit() {
@@ -513,7 +537,7 @@ public class Game {
         }
     }
 
-    public void useDoorTo(int destinationRoomId) {
+    private void useDoorTo(int destinationRoomId) {
         if (!turnManager.canAct()) {
             throw new IllegalStateException("Action is not available in this turn");
         }
@@ -700,7 +724,7 @@ public class Game {
         }
         if ("Traje con escudo".equals(droppedItemName)) {
             Item drop = new Armor(CasinoMapBuilder.SHIELD_SUIT_ID, "Traje con escudo", 4);
-            inventory.addItem(drop);
+            inventory.addItem(drop, player);
             log.add("Objeto obtenido por drop: " + drop.getName());
         }
     }
@@ -727,7 +751,7 @@ public class Game {
 
     private void processEnemyAction(Room room, Enemy enemy) {
         if (combatService.areAdjacent(enemy.getPosition(), player.getPosition())) {
-            CombatResult result = combatService.enemyAttacksPlayer(enemy, player, Math.random());
+            CombatResult result = combatService.enemyAttacksPlayer(enemy, player, nextRandomValue());
             log.add(enemy.getName() + " ataca al jugador: " + result.getDamageDealt() + " de dano");
             turnManager.checkDefeatByHealth(player);
             return;
@@ -753,8 +777,33 @@ public class Game {
         return damage <= 0 ? 1 : damage;
     }
 
+    private MyLinkedList<Position> findTrapsInLine(Room room, Position origin, Position destination, Direction direction) {
+        MyLinkedList<Position> traps = new MyLinkedList<>();
+        Position current = origin;
+        while (!current.equals(destination)) {
+            current = new Position(current.getRow() + direction.getRowDelta(),
+                    current.getColumn() + direction.getColumnDelta());
+            if (room.getCell(current).getType() == CellType.TRAP) {
+                traps.add(current);
+            }
+        }
+        return traps;
+    }
+
+    private void applyTrapDamage(Position trapPosition) {
+        int damage = calculateDangerousCompanionDamage();
+        player.setCurrentHealth(player.getCurrentHealth() - damage);
+        log.add("Trampa activada en " + trapPosition.getRow() + "," + trapPosition.getColumn()
+                + ": " + damage + " de dano");
+        turnManager.checkDefeatByHealth(player);
+    }
+
     private int absolute(int value) {
         return value < 0 ? -value : value;
+    }
+
+    protected double nextRandomValue() {
+        return Math.random();
     }
 
     private void validateRandomValue(double randomValue) {

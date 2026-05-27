@@ -61,6 +61,28 @@ class MovementServiceTest {
     }
 
     @Test
+    void playerCannotMoveToInteractiveBlockingCells() {
+        Position start = new Position(2, 2);
+        Room room = openRoom(5, 5, start);
+        Player player = playerAt(start, 2);
+        Position item = new Position(2, 3);
+        room.setCellType(item, CellType.ITEM);
+
+        assertFalse(movementService.canMove(room, player, item));
+    }
+
+    @Test
+    void playerCanMoveToTrap() {
+        Position start = new Position(2, 2);
+        Room room = openRoom(5, 5, start);
+        Player player = playerAt(start, 1);
+        Position trap = new Position(2, 3);
+        room.setCellType(trap, CellType.TRAP);
+
+        assertTrue(movementService.canMove(room, player, trap));
+    }
+
+    @Test
     void lineMovementStopsBeforeObstacle() {
         Position start = new Position(2, 1);
         Room room = openRoom(5, 5, start);
@@ -76,6 +98,17 @@ class MovementServiceTest {
         Position start = new Position(2, 1);
         Room room = openRoom(5, 5, start);
         room.setCell(new Position(2, 3), new Cell(new Door(2), "Puerta"));
+
+        Position destination = movementService.calculateLineDestination(room, start, Direction.RIGHT);
+
+        assertEquals(new Position(2, 2), destination);
+    }
+
+    @Test
+    void lineMovementStopsBeforeItem() {
+        Position start = new Position(2, 1);
+        Room room = openRoom(5, 5, start);
+        room.setCellType(new Position(2, 3), CellType.ITEM);
 
         Position destination = movementService.calculateLineDestination(room, start, Direction.RIGHT);
 

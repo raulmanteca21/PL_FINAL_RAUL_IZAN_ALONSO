@@ -38,10 +38,13 @@ class PersistenceJsonTest {
         assertEquals(8, game.getMap().getRoomCount());
         assertEquals(1, game.getPlayer().getCurrentRoomId());
         assertEquals(new Position(3, 3), game.getPlayer().getPosition());
-        assertEquals(30, game.getTurnManager().getTurnsRemaining());
+        assertEquals(125, game.getTurnManager().getTurnsRemaining());
         assertTrue(game.getMap().areRoomsConnected(1, 2));
         assertTrue(game.getMap().areRoomsConnected(5, 7));
         assertTrue(game.getMap().roomHasCellType(8, CellType.EXIT));
+        assertNotNull(game.getMap().getRoom(1).findItemAt(new Position(3, 4)));
+        assertNotNull(game.getMap().getRoom(2).findEnemyById("SLOT_MACHINE_BROKEN"));
+        assertEquals(4, game.getBarShop().size());
     }
 
     @Test
@@ -89,7 +92,7 @@ class PersistenceJsonTest {
     void saveAndLoadRestoresCurrentRoomPositionStatsChipsFriendAndLog() {
         Game game = Game.createNewGame(30);
         placePlayerInRoom(game, 5, new Position(4, 4));
-        game.getPlayer().setCurrentHealth(72);
+        game.getPlayer().setCurrentHealth(12);
         game.getPlayer().addChips(Shop.TREASURY_KEY_PRICE);
         game.buyFromBar(Shop.TREASURY_KEY_SHOP_ID);
         game.getPlayer().rescueFriend();
@@ -101,7 +104,7 @@ class PersistenceJsonTest {
 
         assertEquals(5, loaded.getPlayer().getCurrentRoomId());
         assertEquals(new Position(4, 4), loaded.getPlayer().getPosition());
-        assertEquals(72, loaded.getPlayer().getCurrentHealth());
+        assertEquals(12, loaded.getPlayer().getCurrentHealth());
         assertEquals(0, loaded.getPlayer().getChips());
         assertTrue(loaded.getInventory().hasTreasuryKey());
         assertTrue(loaded.getPlayer().isFriendRescued());
@@ -209,8 +212,8 @@ class PersistenceJsonTest {
 
     private String validSavePrefix() {
         return "{\"version\":1,\"state\":\"IN_PROGRESS\",\"player\":{" +
-                "\"currentRoomId\":1,\"row\":3,\"column\":3,\"maxHealth\":100,\"currentHealth\":100," +
-                "\"attack\":10,\"defense\":5,\"movementPoints\":3,\"chips\":0,\"friendRescued\":false}," +
+                "\"currentRoomId\":1,\"row\":3,\"column\":3,\"maxHealth\":20,\"currentHealth\":20," +
+                "\"attack\":4,\"defense\":0,\"movementPoints\":3,\"chips\":0,\"friendRescued\":false}," +
                 "\"turn\":{\"turnsRemaining\":30,\"movementUsed\":false,\"actionUsed\":false," +
                 "\"enemyPhaseProcessedLastTurn\":false,\"phase\":\"PLAYER_TURN\"}," +
                 "\"inventory\":{\"items\":[],\"equippedWeaponId\":\"\",\"equippedArmorId\":\"\",\"activeEffects\":[]}," +

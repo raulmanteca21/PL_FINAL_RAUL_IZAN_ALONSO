@@ -6,7 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class CasinoEscapeApp extends Application {
-    private static final int DEFAULT_TURNS = 30;
+    private static final int DEFAULT_TURNS = 125;
     private static final int WINDOW_WIDTH = 1200;
     private static final int WINDOW_HEIGHT = 800;
 

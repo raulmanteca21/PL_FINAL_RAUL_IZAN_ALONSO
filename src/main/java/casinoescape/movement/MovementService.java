@@ -64,7 +64,7 @@ public class MovementService {
                 return current;
             }
             Position next = new Position(nextRow, nextColumn);
-            if (!room.isWalkable(next) || room.getCell(next).getType() == CellType.DOOR) {
+            if (!room.isWalkable(next)) {
                 return current;
             }
             current = next;

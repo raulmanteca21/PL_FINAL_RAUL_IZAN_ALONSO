@@ -41,6 +41,72 @@ class InventoryTest {
     }
 
     @Test
+    void inventoryRejectsItemsOverMaximumCapacity() {
+        Inventory inventory = new Inventory();
+        for (int i = 0; i < Inventory.MAX_ITEMS; i++) {
+            inventory.addItem(new Weapon("WEAPON_" + i, "Arma " + i, 1));
+        }
+
+        assertThrows(IllegalStateException.class,
+                () -> inventory.addItem(new Weapon("EXTRA", "Extra", 1)));
+        assertEquals(Inventory.MAX_ITEMS, inventory.size());
+    }
+
+    @Test
+    void firstWeaponAddedWithPlayerIsEquippedAutomatically() {
+        Inventory inventory = new Inventory();
+        Player player = player();
+        Weapon weapon = new Weapon("BROKEN_BOTTLE", "Botella rota", 3);
+
+        inventory.addItem(weapon, player);
+
+        assertSame(weapon, inventory.getEquippedWeapon());
+        assertEquals(13, player.getAttack());
+    }
+
+    @Test
+    void addingSecondWeaponDoesNotReplaceEquippedWeaponAutomatically() {
+        Inventory inventory = new Inventory();
+        Player player = player();
+        Weapon first = new Weapon("BROKEN_BOTTLE", "Botella rota", 3);
+        Weapon second = new Weapon("CANE", "Baston", 6);
+
+        inventory.addItem(first, player);
+        inventory.addItem(second, player);
+
+        assertSame(first, inventory.getEquippedWeapon());
+        assertEquals(13, player.getAttack());
+    }
+
+    @Test
+    void removingEquippedWeaponRevertsAttackBonus() {
+        Inventory inventory = new Inventory();
+        Player player = player();
+        Weapon weapon = new Weapon("BROKEN_BOTTLE", "Botella rota", 3);
+        inventory.addItem(weapon, player);
+
+        assertTrue(inventory.removeItem(weapon, player));
+
+        assertNull(inventory.getEquippedWeapon());
+        assertEquals(10, player.getAttack());
+    }
+
+    @Test
+    void removingEquippedArmorRevertsDefenseBonus() {
+        Inventory inventory = new Inventory();
+        Player player = player();
+        Armor armor = new Armor("SHIELD_SUIT", "Traje con escudo", 3);
+        inventory.addItem(armor);
+        inventory.equipArmor("SHIELD_SUIT", player);
+
+        Item removed = inventory.removeAt(0, player);
+
+        assertSame(armor, removed);
+        assertNull(inventory.getEquippedArmor());
+        assertEquals(5, player.getDefense());
+    }
+
+    @Test
     void consumableHealsWithoutExceedingMaxHealthAndIsRemoved() {
         Inventory inventory = new Inventory();
         Player player = player();

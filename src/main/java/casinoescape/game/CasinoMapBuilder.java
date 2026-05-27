@@ -145,18 +145,18 @@ public class CasinoMapBuilder {
 
     private void placeBaseDynamicContent(Room room1, Room room2, Room room3, Room room4, Room room5, Room room6, Room room7) {
         room1.addItem(new Weapon(BROKEN_BOTTLE_ID, "Botella rota", 3), new Position(3, 4));
-        room2.addEnemy(new Enemy(SLOT_MACHINE_ENEMY_ID, "Maquina Tragaperras Averiada", 35, 7, 2, new Position(3, 4), 4, ""));
+        room2.addEnemy(new Enemy(SLOT_MACHINE_ENEMY_ID, "Maquina Tragaperras Averiada", 35, 7, 2, new Position(3, 4), 8, ""));
         room2.addItem(new Consumable(TOBACCO_PACK_ID, "Cajetilla de tabaco",
                 new Effect(EffectType.MOVEMENT_BONUS, 1, 4)), new Position(5, 3));
         room3.addItem(new Armor(GOLD_SUIT_ID, "Traje de oro", 6, 2), new Position(3, 2));
         room3.addItem(new Weapon(GYPSY_CANE_ID, "Baston gitano", 9), new Position(3, 4));
-        room4.addEnemy(new Enemy(BLACKJACK_DEALER_ENEMY_ID, "Crupier de Blackjack", 45, 9, 4, new Position(3, 2), 6, "Traje con escudo"));
+        room4.addEnemy(new Enemy(BLACKJACK_DEALER_ENEMY_ID, "Crupier de Blackjack", 45, 9, 4, new Position(3, 2), 15, "Traje con escudo"));
         room4.addItem(new Weapon(SHARP_CARDS_ID, "Baraja afilada", 5), new Position(3, 4));
-        room5.addEnemy(new Enemy(DRUNK_ENEMY_ID, "Borracho Agresivo", 30, 8, 2, new Position(4, 3), 3, ""));
+        room5.addEnemy(new Enemy(DRUNK_ENEMY_ID, "Borracho Agresivo", 30, 8, 2, new Position(4, 3), 12, ""));
         room6.addItem(new Consumable(PRIVATE_ROOM_HEAL_ID, "Chupito revitalizante",
                 new Effect(EffectType.HEAL, 30, 0)), new Position(4, 2));
-        room7.addEnemy(new Enemy(RUSSIAN_MAFIA_ENEMY_ID, "Mafioso Ruso", 65, 12, 5, new Position(3, 3), 8, ""));
-        room7.addEnemy(new Enemy(VIP_THUG_ENEMY_ID, "Maton VIP", 28, 8, 2, new Position(2, 3), 3, ""));
+        room7.addEnemy(new Enemy(RUSSIAN_MAFIA_ENEMY_ID, "Mafioso Ruso", 65, 12, 5, new Position(3, 3), 35, ""));
+        room7.addEnemy(new Enemy(VIP_THUG_ENEMY_ID, "Maton VIP", 28, 8, 2, new Position(2, 3), 10, ""));
     }
 
     private void addDoor(Room room, Position position, int destinationRoomId, boolean locked) {

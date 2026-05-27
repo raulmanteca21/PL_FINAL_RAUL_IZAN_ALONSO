@@ -17,12 +17,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ShopTest {
     @Test
-    void defaultBarShopContainsTreasuryKeyAndConsumable() {
+    void defaultBarShopContainsRequiredItems() {
         Shop shop = Shop.createDefaultBarShop();
 
-        assertEquals(2, shop.size());
+        assertEquals(4, shop.size());
         assertEquals("Llave de Tesoreria", shop.findById(Shop.TREASURY_KEY_SHOP_ID).getName());
+        assertEquals("Vodka Redbull", shop.findById(Shop.VODKA_REDBULL_SHOP_ID).getName());
         assertEquals("Coctel curativo", shop.findById(Shop.HEALING_COCKTAIL_SHOP_ID).getName());
+        assertEquals("Chaleco de portero", shop.findById(Shop.BOUNCER_VEST_SHOP_ID).getName());
+        assertEquals(Shop.TREASURY_KEY_PRICE, shop.findById(Shop.TREASURY_KEY_SHOP_ID).getPrice());
+        assertEquals(Shop.VODKA_REDBULL_PRICE, shop.findById(Shop.VODKA_REDBULL_SHOP_ID).getPrice());
+        assertEquals(Shop.HEALING_COCKTAIL_PRICE, shop.findById(Shop.HEALING_COCKTAIL_SHOP_ID).getPrice());
+        assertEquals(Shop.BOUNCER_VEST_PRICE, shop.findById(Shop.BOUNCER_VEST_SHOP_ID).getPrice());
     }
 
     @Test
@@ -53,6 +59,41 @@ class ShopTest {
         assertEquals(Shop.TREASURY_KEY_PRICE - 1, player.getChips());
         assertTrue(inventory.isEmpty());
         assertFalse(inventory.hasTreasuryKey());
+    }
+
+    @Test
+    void buyingWithFullInventoryDoesNotSpendChips() {
+        Shop shop = Shop.createDefaultBarShop();
+        Player player = playerWithChips(Shop.HEALING_COCKTAIL_PRICE);
+        Inventory inventory = new Inventory();
+        for (int i = 0; i < Inventory.MAX_ITEMS; i++) {
+            inventory.addItem(new Weapon("WEAPON_" + i, "Arma " + i, 1));
+        }
+
+        assertThrows(IllegalStateException.class,
+                () -> shop.buy(Shop.HEALING_COCKTAIL_SHOP_ID, player, inventory));
+
+        assertEquals(Shop.HEALING_COCKTAIL_PRICE, player.getChips());
+        assertEquals(Inventory.MAX_ITEMS, inventory.size());
+    }
+
+    @Test
+    void defaultBarShopAllowsBuyingEveryRequiredItem() {
+        Shop shop = Shop.createDefaultBarShop();
+        Player player = playerWithChips(Shop.TREASURY_KEY_PRICE + Shop.VODKA_REDBULL_PRICE
+                + Shop.HEALING_COCKTAIL_PRICE + Shop.BOUNCER_VEST_PRICE);
+        Inventory inventory = new Inventory();
+
+        shop.buy(Shop.TREASURY_KEY_SHOP_ID, player, inventory);
+        shop.buy(Shop.VODKA_REDBULL_SHOP_ID, player, inventory);
+        shop.buy(Shop.HEALING_COCKTAIL_SHOP_ID, player, inventory);
+        shop.buy(Shop.BOUNCER_VEST_SHOP_ID, player, inventory);
+
+        assertTrue(inventory.containsItemId(KeyItem.TREASURY_KEY_ID));
+        assertTrue(inventory.containsItemId("VODKA_REDBULL"));
+        assertTrue(inventory.containsItemId("HEALING_COCKTAIL"));
+        assertTrue(inventory.containsItemId("BOUNCER_VEST"));
+        assertEquals(0, player.getChips());
     }
 
     @Test

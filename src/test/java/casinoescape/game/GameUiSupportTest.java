@@ -89,11 +89,11 @@ class GameUiSupportTest {
         game.getInventory().addItem(Shop.createDefaultBarShop()
                 .findById(Shop.HEALING_COCKTAIL_SHOP_ID)
                 .createPurchasedItem());
-        game.getPlayer().setCurrentHealth(50);
+        game.getPlayer().setCurrentHealth(5);
 
         game.useItem("HEALING_COCKTAIL");
 
-        assertEquals(75, game.getPlayer().getCurrentHealth());
+        assertEquals(Game.INITIAL_HEALTH, game.getPlayer().getCurrentHealth());
         assertTrue(game.getTurnManager().hasActionBeenUsed());
         assertEquals(1, game.getLog().size());
     }
@@ -105,7 +105,7 @@ class GameUiSupportTest {
 
         game.equipWeapon("TEST_WEAPON");
 
-        assertEquals(14, game.getPlayer().getAttack());
+        assertEquals(Game.INITIAL_ATTACK + 4, game.getPlayer().getAttack());
         assertTrue(game.getTurnManager().hasActionBeenUsed());
         assertEquals(1, game.getLog().size());
     }

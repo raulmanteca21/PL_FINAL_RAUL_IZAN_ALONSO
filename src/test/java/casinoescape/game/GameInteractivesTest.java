@@ -65,8 +65,8 @@ class GameInteractivesTest {
 
         int damage = game.applyDangerousCompanionEffectIfInRange();
 
-        assertEquals(10, damage);
-        assertEquals(90, game.getPlayer().getCurrentHealth());
+        assertEquals(2, damage);
+        assertEquals(18, game.getPlayer().getCurrentHealth());
         assertEquals(GameState.IN_PROGRESS, game.getState());
         assertEquals(1, game.getLog().size());
     }
@@ -77,24 +77,24 @@ class GameInteractivesTest {
         placePlayerInRoom(outsideRange, 6, new Position(2, 2));
 
         assertEquals(0, outsideRange.applyDangerousCompanionEffectIfInRange());
-        assertEquals(100, outsideRange.getPlayer().getCurrentHealth());
+        assertEquals(Game.INITIAL_HEALTH, outsideRange.getPlayer().getCurrentHealth());
 
         Game diagonal = Game.createNewGame(30);
         placePlayerInRoom(diagonal, 6, new Position(2, 5));
 
         assertEquals(0, diagonal.applyDangerousCompanionEffectIfInRange());
-        assertEquals(100, diagonal.getPlayer().getCurrentHealth());
+        assertEquals(Game.INITIAL_HEALTH, diagonal.getPlayer().getCurrentHealth());
     }
 
     @Test
     void dangerousCompanionCanCauseDefeat() {
         Game game = Game.createNewGame(30);
         placePlayerInRoom(game, 6, new Position(3, 5));
-        game.getPlayer().setCurrentHealth(5);
+        game.getPlayer().setCurrentHealth(2);
 
         int damage = game.applyDangerousCompanionEffectIfInRange();
 
-        assertEquals(10, damage);
+        assertEquals(2, damage);
         assertEquals(0, game.getPlayer().getCurrentHealth());
         assertEquals(GameState.DEFEAT, game.getState());
     }
@@ -107,7 +107,7 @@ class GameInteractivesTest {
         RouletteResult result = game.playRussianRoulette(false, 0.9);
 
         assertFalse(result.wasPlayed());
-        assertEquals(100, game.getPlayer().getCurrentHealth());
+        assertEquals(Game.INITIAL_HEALTH, game.getPlayer().getCurrentHealth());
         assertEquals(0, game.getPlayer().getChips());
         assertEquals(GameState.IN_PROGRESS, game.getState());
     }
@@ -136,7 +136,7 @@ class GameInteractivesTest {
         assertTrue(result.wasPlayed());
         assertFalse(result.isFavorable());
         assertTrue(result.isLethal());
-        assertEquals(100, result.getDamageTaken());
+        assertEquals(Game.INITIAL_HEALTH, result.getDamageTaken());
         assertEquals(0, game.getPlayer().getCurrentHealth());
         assertEquals(GameState.DEFEAT, game.getState());
     }
@@ -181,7 +181,7 @@ class GameInteractivesTest {
 
         game.endTurn();
 
-        assertEquals(90, game.getPlayer().getCurrentHealth());
+        assertEquals(18, game.getPlayer().getCurrentHealth());
         assertEquals(29, game.getTurnManager().getTurnsRemaining());
     }
 

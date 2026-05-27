@@ -4,6 +4,8 @@ import casinoescape.model.Player;
 import casinoescape.structures.MyLinkedList;
 
 public class Inventory {
+    public static final int MAX_ITEMS = 8;
+
     private final MyLinkedList<Item> items = new MyLinkedList<>();
     private final MyLinkedList<Effect> activeEffects = new MyLinkedList<>();
     private Weapon equippedWeapon;
@@ -13,7 +15,18 @@ public class Inventory {
         if (item == null) {
             throw new IllegalArgumentException("Item is required");
         }
+        if (items.size() >= MAX_ITEMS) {
+            throw new IllegalStateException("Inventory is full");
+        }
         items.add(item);
+    }
+
+    public void addItem(Item item, Player player) {
+        requirePlayer(player);
+        addItem(item);
+        if (item instanceof Weapon && equippedWeapon == null) {
+            equipWeapon(item.getId(), player);
+        }
     }
 
     public boolean removeItem(Item item) {
@@ -23,7 +36,23 @@ public class Inventory {
         return items.remove(item);
     }
 
+    public boolean removeItem(Item item, Player player) {
+        requirePlayer(player);
+        if (item == null) {
+            throw new IllegalArgumentException("Item is required");
+        }
+        unequipIfNeeded(item, player);
+        return items.remove(item);
+    }
+
     public Item removeAt(int index) {
+        return items.removeAt(index);
+    }
+
+    public Item removeAt(int index, Player player) {
+        requirePlayer(player);
+        Item item = items.get(index);
+        unequipIfNeeded(item, player);
         return items.removeAt(index);
     }
 
@@ -45,6 +74,10 @@ public class Inventory {
 
     public boolean isEmpty() {
         return items.isEmpty();
+    }
+
+    public boolean isFull() {
+        return items.size() >= MAX_ITEMS;
     }
 
     public void clear() {
@@ -128,6 +161,18 @@ public class Inventory {
         Consumable consumable = (Consumable) item;
         applyEffect(consumable.getEffect(), player);
         items.remove(consumable);
+    }
+
+    private void unequipIfNeeded(Item item, Player player) {
+        if (item == equippedWeapon) {
+            player.setAttack(player.getAttack() - equippedWeapon.getAttackBonus());
+            equippedWeapon = null;
+        }
+        if (item == equippedArmor) {
+            player.setDefense(player.getDefense() - equippedArmor.getDefenseBonus());
+            player.setAttack(player.getAttack() - equippedArmor.getAttackBonus());
+            equippedArmor = null;
+        }
     }
 
     public void decreaseTemporaryEffects(Player player) {

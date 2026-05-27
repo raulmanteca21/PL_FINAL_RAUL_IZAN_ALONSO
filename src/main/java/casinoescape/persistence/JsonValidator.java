@@ -32,6 +32,7 @@ public class JsonValidator {
         }
         validateRooms(config.rooms);
         validateConnections(config.connections);
+        validateShop(config.shop);
         if (config.victory == null || config.victory.exitRoomId != CasinoMap.EXIT_ROOM_ID || !config.victory.requiresFriendRescued) {
             throw new InvalidConfigurationException("Victory configuration is invalid");
         }
@@ -145,6 +146,52 @@ public class JsonValidator {
                 throw new InvalidConfigurationException("Room name is required");
             }
             validateCells(room);
+            validateRoomItems(room);
+            validateRoomEnemies(room);
+        }
+    }
+
+    private void validateRoomItems(PersistenceData.RoomConfigData room) {
+        if (room.items == null) {
+            return;
+        }
+        for (int i = 0; i < room.items.length; i++) {
+            PersistenceData.RoomItemConfigData item = room.items[i];
+            validateItem(item);
+            if (item.row < 0 || item.column < 0 || item.row >= room.rows || item.column >= room.columns) {
+                throw new InvalidConfigurationException("Room item position is invalid");
+            }
+        }
+    }
+
+    private void validateRoomEnemies(PersistenceData.RoomConfigData room) {
+        if (room.enemies == null) {
+            return;
+        }
+        for (int i = 0; i < room.enemies.length; i++) {
+            PersistenceData.EnemyConfigData enemy = room.enemies[i];
+            if (enemy == null || enemy.id == null || enemy.id.isBlank() || enemy.name == null || enemy.name.isBlank()) {
+                throw new InvalidConfigurationException("Enemy configuration is invalid");
+            }
+            if (enemy.maxHealth <= 0 || enemy.attack < 0 || enemy.defense < 0 || enemy.chipReward < 0) {
+                throw new InvalidConfigurationException("Enemy stats are invalid");
+            }
+            if (enemy.row < 0 || enemy.column < 0 || enemy.row >= room.rows || enemy.column >= room.columns) {
+                throw new InvalidConfigurationException("Enemy position is invalid");
+            }
+        }
+    }
+
+    private void validateShop(PersistenceData.ShopItemConfigData[] shop) {
+        if (shop == null) {
+            return;
+        }
+        for (int i = 0; i < shop.length; i++) {
+            PersistenceData.ShopItemConfigData item = shop[i];
+            validateItem(item);
+            if (item.shopItemId == null || item.shopItemId.isBlank() || item.price < 0) {
+                throw new InvalidConfigurationException("Shop item configuration is invalid");
+            }
         }
     }
 
@@ -246,16 +293,20 @@ public class JsonValidator {
         }
         for (int i = 0; i < items.length; i++) {
             PersistenceData.ItemData item = items[i];
-            if (item == null || item.id == null || item.id.isBlank() || item.name == null || item.name.isBlank()) {
-                throw new InvalidConfigurationException("Inventory item is invalid");
-            }
-            requireItemType(item.type);
-            if (item.attackBonus < 0 || item.defenseBonus < 0) {
-                throw new InvalidConfigurationException("Item bonuses cannot be negative");
-            }
-            if ("CONSUMABLE".equals(item.type)) {
-                validateEffect(item.effect);
-            }
+            validateItem(item);
+        }
+    }
+
+    private void validateItem(PersistenceData.ItemData item) {
+        if (item == null || item.id == null || item.id.isBlank() || item.name == null || item.name.isBlank()) {
+            throw new InvalidConfigurationException("Item data is invalid");
+        }
+        requireItemType(item.type);
+        if (item.attackBonus < 0 || item.defenseBonus < 0) {
+            throw new InvalidConfigurationException("Item bonuses cannot be negative");
+        }
+        if ("CONSUMABLE".equals(item.type)) {
+            validateEffect(item.effect);
         }
     }
 

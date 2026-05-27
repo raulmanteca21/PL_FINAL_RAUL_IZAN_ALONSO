@@ -10,7 +10,6 @@ import casinoescape.model.Cell;
 import casinoescape.model.CellType;
 import casinoescape.model.GameState;
 import casinoescape.model.Position;
-import casinoescape.model.Room;
 import casinoescape.persistence.GameSaveLoader;
 import casinoescape.persistence.GameSaveWriter;
 import casinoescape.structures.MyLinkedList;
@@ -95,8 +94,8 @@ public class GameController {
     private void handleCellClick(Position position) {
         try {
             Cell cell = game.getCurrentRoom().getCell(position);
-            if (cell.getType() == CellType.DOOR) {
-                game.useDoorAt(position);
+            if (cell.isInteractive()) {
+                interactWith(position);
             } else {
                 game.movePlayer(position);
             }

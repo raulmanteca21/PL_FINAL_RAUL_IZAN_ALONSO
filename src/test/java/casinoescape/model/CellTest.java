@@ -31,6 +31,12 @@ class CellTest {
         assertFalse(new Cell(CellType.PLAYER).isWalkable());
         assertFalse(new Cell(CellType.ENEMY).isWalkable());
         assertFalse(new Cell(CellType.NPC).isWalkable());
+        assertFalse(new Cell(CellType.ITEM).isWalkable());
+        assertFalse(new Cell(CellType.DOOR).isWalkable());
+        assertFalse(new Cell(CellType.SHOP).isWalkable());
+        assertFalse(new Cell(CellType.EXIT).isWalkable());
+        assertFalse(new Cell(CellType.MINIGAME).isWalkable());
+        assertTrue(new Cell(CellType.TRAP).isWalkable());
     }
 
     @Test
@@ -38,7 +44,7 @@ class CellTest {
         assertTrue(new Cell(CellType.ITEM).isInteractive());
         assertTrue(new Cell(CellType.DOOR).isInteractive());
         assertTrue(new Cell(CellType.NPC).isInteractive());
-        assertTrue(new Cell(CellType.TRAP).isInteractive());
+        assertFalse(new Cell(CellType.TRAP).isInteractive());
         assertTrue(new Cell(CellType.SHOP).isInteractive());
         assertTrue(new Cell(CellType.EXIT).isInteractive());
         assertTrue(new Cell(CellType.MINIGAME).isInteractive());

@@ -55,10 +55,10 @@ class GameTest {
     @Test
     void cannotUseLockedDoorWithoutTreasuryKey() {
         Game game = Game.createNewGame(30);
-        placePlayerInRoom(game, 2, new Position(5, 3));
+        placePlayerInRoom(game, 2, new Position(1, 3));
 
         assertFalse(game.canUseDoorTo(3));
-        assertThrows(IllegalStateException.class, () -> game.useDoorTo(3));
+        assertThrows(IllegalStateException.class, () -> game.useDoorAt(new Position(0, 3)));
 
         assertEquals(2, game.getPlayer().getCurrentRoomId());
         assertFalse(game.getTurnManager().hasActionBeenUsed());
@@ -68,10 +68,10 @@ class GameTest {
     @Test
     void canUseLockedDoorWithTreasuryKey() {
         Game game = Game.createNewGame(30);
-        placePlayerInRoom(game, 2, new Position(5, 3));
+        placePlayerInRoom(game, 2, new Position(1, 3));
         game.getInventory().addItem(new KeyItem(KeyItem.TREASURY_KEY_ID, CasinoMapBuilder.TREASURY_KEY_NAME));
 
-        game.useDoorTo(3);
+        game.useDoorAt(new Position(0, 3));
 
         assertEquals(3, game.getPlayer().getCurrentRoomId());
         assertEquals(new Position(5, 3), game.getPlayer().getPosition());

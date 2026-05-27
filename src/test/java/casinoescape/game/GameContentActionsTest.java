@@ -40,7 +40,7 @@ class GameContentActionsTest {
         CombatResult result = game.attackEnemyAt(enemy.getPosition(), 1.0);
 
         assertTrue(result.isDefenderDied());
-        assertEquals(6, result.getChipsAwarded());
+        assertEquals(15, result.getChipsAwarded());
         assertNull(game.getCurrentRoom().findEnemyById(CasinoMapBuilder.BLACKJACK_DEALER_ENEMY_ID));
         assertTrue(game.getInventory().containsItemId(CasinoMapBuilder.SHIELD_SUIT_ID));
         assertEquals(CellType.EMPTY, game.getCurrentRoom().getCell(new Position(3, 2)).getType());

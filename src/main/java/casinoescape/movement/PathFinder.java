@@ -116,9 +116,17 @@ public class PathFinder {
         return new MyLinkedList<>();
     }
 
-    private boolean canVisit(Room room, MyMatrix<Boolean> visited, Position position) {
+    private boolean canVisit(Room room, MyMatrix<Boolean> visited, Position position, Position goal) {
         return !Boolean.TRUE.equals(visited.get(position.getRow(), position.getColumn()))
-                && room.isWalkable(position);
+                && (room.isWalkable(position) || isAllowedNonWalkableGoal(room, position, goal));
+    }
+
+    private boolean isAllowedNonWalkableGoal(Room room, Position position, Position goal) {
+        if (!position.equals(goal)) {
+            return false;
+        }
+        CellType targetType = room.getCell(position).getType();
+        return targetType == CellType.DOOR || targetType == CellType.EXIT;
     }
 
     private boolean isInside(Room room, int row, int column) {

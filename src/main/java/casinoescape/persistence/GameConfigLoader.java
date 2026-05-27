@@ -6,13 +6,23 @@ import casinoescape.exceptions.PersistenceException;
 import casinoescape.game.CasinoMapBuilder;
 import casinoescape.game.Game;
 import casinoescape.game.TurnManager;
+import casinoescape.items.Armor;
+import casinoescape.items.Consumable;
+import casinoescape.items.Effect;
+import casinoescape.items.EffectType;
 import casinoescape.items.Inventory;
+import casinoescape.items.Item;
+import casinoescape.items.ItemType;
+import casinoescape.items.KeyItem;
 import casinoescape.items.Shop;
+import casinoescape.items.ShopItem;
+import casinoescape.items.Weapon;
 import casinoescape.logging.GameLog;
 import casinoescape.model.CasinoMap;
 import casinoescape.model.Cell;
 import casinoescape.model.CellType;
 import casinoescape.model.Door;
+import casinoescape.model.Enemy;
 import casinoescape.model.Player;
 import casinoescape.model.Position;
 import casinoescape.model.Room;
@@ -48,8 +58,7 @@ public class GameConfigLoader {
         PersistenceData.GameConfigData config = readConfig(path);
         validator.validateConfig(config);
         CasinoMap map = buildMap(config);
-        new CasinoMapBuilder().placeBaseDynamicContent(map);
-        Player player = new Player(100, 10, 5, 3, config.initialRoomId,
+        Player player = new Player(Game.INITIAL_HEALTH, Game.INITIAL_ATTACK, Game.INITIAL_DEFENSE, Game.INITIAL_MOVEMENT, config.initialRoomId,
                 new Position(config.initialPlayerPosition.row, config.initialPlayerPosition.column));
         return new Game(
                 map,
@@ -58,7 +67,7 @@ public class GameConfigLoader {
                 new TurnManager(config.initialTurns),
                 new MovementService(),
                 new PathFinder(),
-                Shop.createDefaultBarShop(),
+                buildShop(config.shop),
                 new GameLog(),
                 Game.createWelcomeNpcForRestore(false),
                 Game.createBarSpecialNpcForRestore(false),
@@ -72,6 +81,8 @@ public class GameConfigLoader {
             PersistenceData.RoomConfigData roomData = findRoom(config.rooms, roomId);
             Room room = new Room(roomData.id, roomData.name, roomData.rows, roomData.columns);
             applyCells(room, roomData.cells);
+            applyItems(room, roomData.items);
+            applyEnemies(room, roomData.enemies);
             rooms.add(room);
         }
 
@@ -112,6 +123,60 @@ public class GameConfigLoader {
                 room.setCell(position, new Cell(CellType.valueOf(cell.type), cell.label));
             }
         }
+    }
+
+    private void applyItems(Room room, PersistenceData.RoomItemConfigData[] items) {
+        if (items == null) {
+            return;
+        }
+        for (int i = 0; i < items.length; i++) {
+            PersistenceData.RoomItemConfigData item = items[i];
+            room.addItem(createItem(item), new Position(item.row, item.column));
+        }
+    }
+
+    private void applyEnemies(Room room, PersistenceData.EnemyConfigData[] enemies) {
+        if (enemies == null) {
+            return;
+        }
+        for (int i = 0; i < enemies.length; i++) {
+            PersistenceData.EnemyConfigData enemy = enemies[i];
+            room.addEnemy(new Enemy(enemy.id, enemy.name, enemy.maxHealth, enemy.attack, enemy.defense,
+                    new Position(enemy.row, enemy.column), enemy.chipReward, enemy.dropName));
+        }
+    }
+
+    private Shop buildShop(PersistenceData.ShopItemConfigData[] shopItems) {
+        if (shopItems == null) {
+            return Shop.createDefaultBarShop();
+        }
+        Shop shop = new Shop();
+        for (int i = 0; i < shopItems.length; i++) {
+            PersistenceData.ShopItemConfigData shopItem = shopItems[i];
+            shop.addItem(new ShopItem(shopItem.shopItemId, shopItem.name, shopItem.price, createItem(shopItem)));
+        }
+        return shop;
+    }
+
+    private Item createItem(PersistenceData.ItemData data) {
+        ItemType type = ItemType.valueOf(data.type);
+        if (type == ItemType.WEAPON) {
+            return new Weapon(data.id, data.name, data.attackBonus);
+        }
+        if (type == ItemType.ARMOR) {
+            return new Armor(data.id, data.name, data.defenseBonus, data.attackBonus);
+        }
+        if (type == ItemType.CONSUMABLE) {
+            return new Consumable(data.id, data.name, createEffect(data.effect));
+        }
+        if (type == ItemType.KEY) {
+            return new KeyItem(data.id, data.name);
+        }
+        throw new PersistenceException("Unsupported item type: " + data.type);
+    }
+
+    private Effect createEffect(PersistenceData.EffectData data) {
+        return new Effect(EffectType.valueOf(data.type), data.amount, data.remainingTurns);
     }
 
     private PersistenceData.GameConfigData readConfig(Path path) {

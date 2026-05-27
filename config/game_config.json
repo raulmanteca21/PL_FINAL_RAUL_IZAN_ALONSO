@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "initialTurns": 30,
+  "initialTurns": 125,
   "initialRoomId": 1,
   "initialPlayerPosition": {
     "row": 3,
@@ -14,6 +14,8 @@
       { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 4 },
       { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
       { "row": 5, "column": 1, "type": "OBSTACLE" }, { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ], "items": [
+      { "id": "BROKEN_BOTTLE", "name": "Botella rota", "type": "WEAPON", "attackBonus": 3, "row": 3, "column": 4 }
     ] },
     { "id": 2, "name": "Tragaperras", "rows": 7, "columns": 7, "cells": [
       { "row": 6, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 1 },
@@ -22,12 +24,19 @@
       { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 3, "type": "OBSTACLE" },
       { "row": 1, "column": 5, "type": "OBSTACLE" }, { "row": 3, "column": 3, "type": "OBSTACLE" },
       { "row": 5, "column": 1, "type": "OBSTACLE" }, { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ], "items": [
+      { "id": "TOBACCO_PACK", "name": "Cajetilla de tabaco", "type": "CONSUMABLE", "effect": { "type": "MOVEMENT_BONUS", "amount": 1, "remainingTurns": 4 }, "row": 5, "column": 3 }
+    ], "enemies": [
+      { "id": "SLOT_MACHINE_BROKEN", "name": "Maquina Tragaperras Averiada", "maxHealth": 35, "attack": 7, "defense": 2, "row": 3, "column": 4, "chipReward": 8, "dropName": "" }
     ] },
     { "id": 3, "name": "Tesoreria / Caja Fuerte", "rows": 7, "columns": 7, "cells": [
       { "row": 6, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 2 },
       { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
       { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 1, "type": "OBSTACLE" },
       { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ], "items": [
+      { "id": "GOLD_SUIT", "name": "Traje de oro", "type": "ARMOR", "defenseBonus": 6, "attackBonus": 2, "row": 3, "column": 2 },
+      { "id": "GYPSY_CANE", "name": "Baston gitano", "type": "WEAPON", "attackBonus": 9, "row": 3, "column": 4 }
     ] },
     { "id": 4, "name": "Blackjack", "rows": 7, "columns": 7, "cells": [
       { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 1 },
@@ -36,6 +45,10 @@
       { "row": 1, "column": 2, "type": "OBSTACLE" }, { "row": 1, "column": 4, "type": "OBSTACLE" },
       { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 2, "type": "OBSTACLE" },
       { "row": 5, "column": 4, "type": "OBSTACLE" }
+    ], "items": [
+      { "id": "SHARP_CARDS", "name": "Baraja afilada", "type": "WEAPON", "attackBonus": 5, "row": 3, "column": 4 }
+    ], "enemies": [
+      { "id": "BLACKJACK_DEALER", "name": "Crupier de Blackjack", "maxHealth": 45, "attack": 9, "defense": 4, "row": 3, "column": 2, "chipReward": 15, "dropName": "Traje con escudo" }
     ] },
     { "id": 5, "name": "Bar", "rows": 7, "columns": 7, "cells": [
       { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 2 },
@@ -47,6 +60,8 @@
       { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
       { "row": 3, "column": 1, "type": "OBSTACLE" }, { "row": 3, "column": 5, "type": "OBSTACLE" },
       { "row": 5, "column": 3, "type": "OBSTACLE" }
+    ], "enemies": [
+      { "id": "AGGRESSIVE_DRUNK", "name": "Borracho Agresivo", "maxHealth": 30, "attack": 8, "defense": 2, "row": 4, "column": 3, "chipReward": 12, "dropName": "" }
     ] },
     { "id": 6, "name": "Zona Privada", "rows": 7, "columns": 7, "cells": [
       { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 4 },
@@ -56,6 +71,8 @@
       { "row": 1, "column": 1, "type": "OBSTACLE" }, { "row": 1, "column": 5, "type": "OBSTACLE" },
       { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 1, "type": "OBSTACLE" },
       { "row": 5, "column": 5, "type": "OBSTACLE" }
+    ], "items": [
+      { "id": "REVITALIZING_SHOT", "name": "Chupito revitalizante", "type": "CONSUMABLE", "effect": { "type": "HEAL", "amount": 30, "remainingTurns": 0 }, "row": 4, "column": 2 }
     ] },
     { "id": 7, "name": "Sala VIP", "rows": 7, "columns": 7, "cells": [
       { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 5 },
@@ -63,6 +80,9 @@
       { "row": 1, "column": 2, "type": "OBSTACLE" }, { "row": 1, "column": 4, "type": "OBSTACLE" },
       { "row": 3, "column": 1, "type": "OBSTACLE" }, { "row": 3, "column": 5, "type": "OBSTACLE" },
       { "row": 5, "column": 3, "type": "OBSTACLE" }
+    ], "enemies": [
+      { "id": "RUSSIAN_MAFIA", "name": "Mafioso Ruso", "maxHealth": 65, "attack": 12, "defense": 5, "row": 3, "column": 3, "chipReward": 35, "dropName": "" },
+      { "id": "VIP_THUG", "name": "Maton VIP", "maxHealth": 28, "attack": 8, "defense": 2, "row": 2, "column": 3, "chipReward": 10, "dropName": "" }
     ] },
     { "id": 8, "name": "Ruleta / Final", "rows": 7, "columns": 7, "cells": [
       { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 7 },
@@ -83,6 +103,12 @@
     { "from": 5, "to": 6 },
     { "from": 5, "to": 7 },
     { "from": 7, "to": 8 }
+  ],
+  "shop": [
+    { "shopItemId": "SHOP_TREASURY_KEY", "id": "TREASURY_KEY", "name": "Llave de Tesoreria", "type": "KEY", "price": 30 },
+    { "shopItemId": "SHOP_VODKA_REDBULL", "id": "VODKA_REDBULL", "name": "Vodka Redbull", "type": "CONSUMABLE", "price": 10, "effect": { "type": "MOVEMENT_BONUS", "amount": 1, "remainingTurns": 3 } },
+    { "shopItemId": "SHOP_HEALING_COCKTAIL", "id": "HEALING_COCKTAIL", "name": "Coctel curativo", "type": "CONSUMABLE", "price": 18, "effect": { "type": "HEAL", "amount": 25, "remainingTurns": 0 } },
+    { "shopItemId": "SHOP_BOUNCER_VEST", "id": "BOUNCER_VEST", "name": "Chaleco de portero", "type": "ARMOR", "price": 25, "defenseBonus": 3 }
   ],
   "victory": {
     "exitRoomId": 8,

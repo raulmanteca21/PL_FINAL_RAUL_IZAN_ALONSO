@@ -8,6 +8,7 @@ class PersistenceData {
         PositionData initialPlayerPosition;
         RoomConfigData[] rooms;
         ConnectionData[] connections;
+        ShopItemConfigData[] shop;
         VictoryData victory;
     }
 
@@ -17,6 +18,30 @@ class PersistenceData {
         int rows;
         int columns;
         CellConfigData[] cells;
+        RoomItemConfigData[] items;
+        EnemyConfigData[] enemies;
+    }
+
+    static class RoomItemConfigData extends ItemData {
+        int row;
+        int column;
+    }
+
+    static class EnemyConfigData {
+        String id;
+        String name;
+        int maxHealth;
+        int attack;
+        int defense;
+        int row;
+        int column;
+        int chipReward;
+        String dropName;
+    }
+
+    static class ShopItemConfigData extends ItemData {
+        String shopItemId;
+        int price;
     }
 
     static class CellConfigData {

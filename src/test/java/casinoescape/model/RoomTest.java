@@ -65,7 +65,7 @@ class RoomTest {
         room.setCellType(door, CellType.DOOR);
 
         assertFalse(room.isWalkable(obstacle));
-        assertTrue(room.isWalkable(door));
+        assertFalse(room.isWalkable(door));
     }
 
     @Test
