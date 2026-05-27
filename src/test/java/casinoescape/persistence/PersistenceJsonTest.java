@@ -1,5 +1,6 @@
 package casinoescape.persistence;
 
+import com.google.gson.JsonParser;
 import casinoescape.exceptions.InvalidConfigurationException;
 import casinoescape.exceptions.PersistenceException;
 import casinoescape.game.Game;
@@ -32,13 +33,14 @@ class PersistenceJsonTest {
     Path tempDir;
 
     @Test
-    void loadValidInitialConfigurationCreatesExpectedGameWorld() {
-        Game game = new GameConfigLoader().load(Path.of("config", "game_config.json"));
+    void loadValidInitialConfigurationCreatesExpectedGameWorld() throws Exception {
+        Path configPath = Path.of("config", "game_config.json");
+        Game game = new GameConfigLoader().load(configPath);
 
         assertEquals(8, game.getMap().getRoomCount());
         assertEquals(1, game.getPlayer().getCurrentRoomId());
         assertEquals(new Position(3, 3), game.getPlayer().getPosition());
-        assertEquals(125, game.getTurnManager().getTurnsRemaining());
+        assertEquals(readInitialTurns(configPath), game.getTurnManager().getTurnsRemaining());
         assertTrue(game.getMap().areRoomsConnected(1, 2));
         assertTrue(game.getMap().areRoomsConnected(5, 7));
         assertTrue(game.getMap().roomHasCellType(8, CellType.EXIT));
@@ -208,6 +210,13 @@ class PersistenceJsonTest {
         game.getPlayer().setCurrentRoomId(roomId);
         game.getPlayer().setPosition(position);
         game.getCurrentRoom().setCellType(position, CellType.PLAYER);
+    }
+
+    private int readInitialTurns(Path configPath) throws Exception {
+        return JsonParser.parseString(Files.readString(configPath))
+                .getAsJsonObject()
+                .get("initialTurns")
+                .getAsInt();
     }
 
     private String validSavePrefix() {

@@ -25,12 +25,32 @@ public class ActionPanelView {
 
     public ActionPanelView() {
         root.setStyle("-fx-padding: 10; -fx-background-color: #141414; -fx-border-color: #d4af37; -fx-border-width: 2 0 0 0;");
-        lineMove.setTooltip(new Tooltip("Requiere Pastilla"));
-        shop.setTooltip(new Tooltip("Requiere estar junto al bar"));
-        roulette.setTooltip(new Tooltip("Requiere estar junto a la ruleta"));
+        endTurn.setTooltip(new Tooltip("Termina tu turno y deja actuar a los enemigos"));
+        attack.setTooltip(new Tooltip("Requiere enemigo adyacente. No se activa al hacer click en el enemigo"));
+        pickItem.setTooltip(new Tooltip("Requiere objeto adyacente"));
+        lineMove.setTooltip(new Tooltip("Requiere Pastilla de dudosa procedencia activa"));
+        interact.setTooltip(new Tooltip("Interactua con NPC, objeto especial, salida o elemento adyacente"));
+        useDoor.setTooltip(new Tooltip("Requiere puerta adyacente"));
+        useItem.setTooltip(new Tooltip("Usa el objeto seleccionado del inventario"));
+        equipWeapon.setTooltip(new Tooltip("Equipa el arma seleccionada"));
+        equipArmor.setTooltip(new Tooltip("Equipa la armadura seleccionada"));
+        shop.setTooltip(new Tooltip("Requiere estar junto al BAR"));
+        roulette.setTooltip(new Tooltip("Requiere estar junto a RULETA"));
+        save.setTooltip(new Tooltip("Guarda la partida actual"));
+        load.setTooltip(new Tooltip("Carga la partida guardada"));
+        replay.setTooltip(new Tooltip("Inicia una nueva partida desde config/game_config.json"));
+        styleActionButtons();
+        replay.setStyle("-fx-background-color: #d4af37; -fx-text-fill: #141414; -fx-font-weight: bold; -fx-border-color: #fff8df; -fx-border-width: 2;");
         replay.setVisible(false);
         replay.setManaged(false);
         root.getChildren().addAll(endTurn, attack, pickItem, lineMove, interact, useDoor, useItem, equipWeapon, equipArmor, shop, roulette, save, load, replay);
+    }
+
+    private void styleActionButtons() {
+        Button[] buttons = {endTurn, attack, pickItem, lineMove, interact, useDoor, useItem, equipWeapon, equipArmor, shop, roulette, save, load};
+        for (Button button : buttons) {
+            button.setStyle("-fx-background-color: #fff8df; -fx-text-fill: #141414; -fx-font-weight: bold; -fx-border-color: #d4af37; -fx-border-width: 1;");
+        }
     }
 
     public Node getNode() {

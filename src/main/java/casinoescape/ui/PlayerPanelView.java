@@ -24,6 +24,7 @@ public class PlayerPanelView {
         title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5c2300;");
         result.setVisible(false);
         result.setManaged(false);
+        result.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #8a1c1c;");
         root.getChildren().addAll(title, room, health, attack, defense, movement, chips, turns, result);
     }
 

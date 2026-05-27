@@ -72,7 +72,7 @@ public class RoomGridView {
         return switch (cell.getType()) {
             case EMPTY -> ".";
             case OBSTACLE -> "#";
-            case PLAYER -> "P";
+            case PLAYER -> "J";
             case ENEMY -> "E";
             case ITEM -> "OBJ";
             case DOOR -> "P";
@@ -101,7 +101,7 @@ public class RoomGridView {
         return "-fx-background-color: " + background + ";"
                 + "-fx-border-color: #0b2f24;"
                 + "-fx-border-width: 2;"
-                + "-fx-font-size: 14;"
+                + "-fx-font-size: 13;"
                 + "-fx-font-weight: bold;";
     }
 

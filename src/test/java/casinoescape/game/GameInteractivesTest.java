@@ -65,8 +65,8 @@ class GameInteractivesTest {
 
         int damage = game.applyDangerousCompanionEffectIfInRange();
 
-        assertEquals(2, damage);
-        assertEquals(18, game.getPlayer().getCurrentHealth());
+        assertEquals(expectedDangerousCompanionDamage(), damage);
+        assertEquals(Game.INITIAL_HEALTH - expectedDangerousCompanionDamage(), game.getPlayer().getCurrentHealth());
         assertEquals(GameState.IN_PROGRESS, game.getState());
         assertEquals(1, game.getLog().size());
     }
@@ -90,11 +90,11 @@ class GameInteractivesTest {
     void dangerousCompanionCanCauseDefeat() {
         Game game = Game.createNewGame(30);
         placePlayerInRoom(game, 6, new Position(3, 5));
-        game.getPlayer().setCurrentHealth(2);
+        game.getPlayer().setCurrentHealth(expectedDangerousCompanionDamage());
 
         int damage = game.applyDangerousCompanionEffectIfInRange();
 
-        assertEquals(2, damage);
+        assertEquals(expectedDangerousCompanionDamage(), damage);
         assertEquals(0, game.getPlayer().getCurrentHealth());
         assertEquals(GameState.DEFEAT, game.getState());
     }
@@ -181,8 +181,13 @@ class GameInteractivesTest {
 
         game.endTurn();
 
-        assertEquals(18, game.getPlayer().getCurrentHealth());
+        assertEquals(Game.INITIAL_HEALTH - expectedDangerousCompanionDamage(), game.getPlayer().getCurrentHealth());
         assertEquals(29, game.getTurnManager().getTurnsRemaining());
+    }
+
+    private int expectedDangerousCompanionDamage() {
+        int damage = Game.INITIAL_HEALTH * Game.DANGEROUS_COMPANION_DAMAGE_PERCENT / 100;
+        return damage <= 0 ? 1 : damage;
     }
 
     private void placePlayerInRoom(Game game, int roomId, Position position) {

@@ -27,14 +27,40 @@ public class InventoryPanelView {
     }
 
     public void refresh(Inventory inventory) {
+        String selectedItemId = getSelectedItemId();
         this.inventory = inventory;
         items.getItems().clear();
         for (int i = 0; i < inventory.size(); i++) {
             Item item = inventory.getItem(i);
-            items.getItems().add(item.getName() + " [" + item.getType() + "]");
+            items.getItems().add(formatItem(item, inventory));
+            if (item.getId().equals(selectedItemId)) {
+                items.getSelectionModel().select(i);
+            }
         }
         equippedWeapon.setText("Arma: " + (inventory.getEquippedWeapon() == null ? "ninguna" : inventory.getEquippedWeapon().getName()));
         equippedArmor.setText("Armadura: " + (inventory.getEquippedArmor() == null ? "ninguna" : inventory.getEquippedArmor().getName()));
+    }
+
+    private String formatItem(Item item, Inventory inventory) {
+        String text = tagFor(item) + " " + item.getName();
+        if (item == inventory.getEquippedWeapon() || item == inventory.getEquippedArmor()) {
+            text += " [EQUIPADO]";
+        }
+        return text;
+    }
+
+    private String tagFor(Item item) {
+        return switch (item.getType()) {
+            case WEAPON -> "[ARMA]";
+            case ARMOR -> "[ARMADURA]";
+            case CONSUMABLE -> "[CONSUMIBLE]";
+            case KEY -> "[LLAVE]";
+        };
+    }
+
+    private String getSelectedItemId() {
+        Item selected = getSelectedItem();
+        return selected == null ? "" : selected.getId();
     }
 
     public Item getSelectedItem() {

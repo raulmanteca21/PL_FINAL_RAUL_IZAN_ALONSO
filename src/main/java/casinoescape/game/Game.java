@@ -35,7 +35,7 @@ public class Game {
     public static final String EXIT_WITHOUT_FRIEND_MESSAGE = "No puedes abandonar el casino sin tu amigo.";
     public static final String VICTORY_MESSAGE = "Has escapado del casino con tu amigo. Victoria.";
     public static final String ROULETTE_DECLINED_MESSAGE = "Has rechazado jugar a la ruleta rusa.";
-    public static final int INITIAL_HEALTH = 20;
+    public static final int INITIAL_HEALTH = 30;
     public static final int INITIAL_ATTACK = 4;
     public static final int INITIAL_DEFENSE = 0;
     public static final int INITIAL_MOVEMENT = 3;

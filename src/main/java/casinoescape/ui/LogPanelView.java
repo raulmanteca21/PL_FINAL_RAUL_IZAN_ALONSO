@@ -18,6 +18,7 @@ public class LogPanelView {
         logArea.setEditable(false);
         logArea.setWrapText(true);
         logArea.setPrefHeight(430);
+        logArea.setStyle("-fx-control-inner-background: #fffdf2; -fx-text-fill: #141414; -fx-border-color: #d4af37; -fx-border-width: 1;");
         root.getChildren().addAll(title, logArea);
     }
 

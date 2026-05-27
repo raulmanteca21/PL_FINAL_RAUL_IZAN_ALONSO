@@ -36,7 +36,11 @@ public class GameController {
     private final ActionPanelView actionPanelView = new ActionPanelView();
     private final LogPanelView logPanelView = new LogPanelView();
     private final RoutePanelView routePanelView = new RoutePanelView();
+    private final RoomHeaderView roomHeaderView = new RoomHeaderView();
+    private final EnemyInfoPanelView enemyInfoPanelView = new EnemyInfoPanelView();
     private GameState lastAnnouncedEndState = GameState.IN_PROGRESS;
+    private int selectedEnemyRoomId = -1;
+    private Position selectedEnemyPosition;
 
     public GameController(Game game) {
         if (game == null) {
@@ -54,11 +58,13 @@ public class GameController {
         VBox leftPanel = new VBox(12, playerPanelView.getNode(), inventoryPanelView.getNode());
         leftPanel.setPrefWidth(245);
 
-        VBox rightPanel = new VBox(12, routePanelView.getNode(), logPanelView.getNode());
+        VBox rightPanel = new VBox(12, routePanelView.getNode(), enemyInfoPanelView.getNode(), logPanelView.getNode());
         rightPanel.setPrefWidth(300);
 
+        VBox centerPanel = new VBox(10, roomHeaderView.getNode(), roomGridView.getNode());
+
         root.setLeft(leftPanel);
-        root.setCenter(roomGridView.getNode());
+        root.setCenter(centerPanel);
         root.setRight(rightPanel);
         root.setBottom(actionPanelView.getNode());
         return root;
@@ -69,9 +75,11 @@ public class GameController {
                 ? game.getReachableCells()
                 : new MyLinkedList<>();
         roomGridView.refresh(game.getCurrentRoom(), reachableCells);
+        roomHeaderView.refresh(game.getCurrentRoom());
         playerPanelView.refresh(game);
         inventoryPanelView.refresh(game.getInventory());
         routePanelView.refresh(game, game.getShortestPathInfo());
+        enemyInfoPanelView.refresh(getSelectedEnemy());
         logPanelView.refresh(game.getLog());
         actionPanelView.refresh(game);
         checkEndState();
@@ -295,6 +303,7 @@ public class GameController {
         try {
             game = new GameSaveLoader().load(DEFAULT_SAVE_PATH);
             lastAnnouncedEndState = GameState.IN_PROGRESS;
+            clearSelectedEnemy();
             showInfo("Cargar", "Partida cargada desde " + DEFAULT_SAVE_PATH);
             refreshAll();
         } catch (RuntimeException exception) {
@@ -306,6 +315,7 @@ public class GameController {
         try {
             game = new GameConfigLoader().load(CONFIG_PATH);
             lastAnnouncedEndState = GameState.IN_PROGRESS;
+            clearSelectedEnemy();
             refreshAll();
         } catch (RuntimeException exception) {
             showError(exception);
@@ -326,16 +336,29 @@ public class GameController {
     private void showEnemyStats(Position position) {
         Enemy enemy = game.getCurrentRoom().findEnemyAt(position);
         if (enemy == null) {
-            showInfo("Enemigo", "No hay enemigo vivo en esta casilla.");
+            clearSelectedEnemy();
             return;
         }
-        String message = "Enemigo: " + enemy.getName()
-                + "\nVida: " + enemy.getCurrentHealth() + "/" + enemy.getMaxHealth()
-                + "\nAtaque: " + enemy.getAttack()
-                + "\nEscudo: " + enemy.getDefense()
-                + "\nMovimiento: aproximacion por BFS"
-                + "\n\nPara combatir usa el boton Atacar.";
-        showInfo("Estadisticas de enemigo", message);
+        selectedEnemyRoomId = game.getCurrentRoom().getId();
+        selectedEnemyPosition = position;
+        enemyInfoPanelView.refresh(enemy);
+    }
+
+    private Enemy getSelectedEnemy() {
+        if (selectedEnemyPosition == null || selectedEnemyRoomId != game.getCurrentRoom().getId()) {
+            clearSelectedEnemy();
+            return null;
+        }
+        Enemy enemy = game.getCurrentRoom().findEnemyAt(selectedEnemyPosition);
+        if (enemy == null) {
+            clearSelectedEnemy();
+        }
+        return enemy;
+    }
+
+    private void clearSelectedEnemy() {
+        selectedEnemyRoomId = -1;
+        selectedEnemyPosition = null;
     }
 
     private boolean isAdjacentToPlayer(Position position) {
@@ -371,9 +394,14 @@ public class GameController {
         }
         lastAnnouncedEndState = game.getState();
         if (game.getState() == GameState.VICTORY) {
-            showInfo("Victoria", Game.VICTORY_MESSAGE);
+            showInfo("Victoria", "Has escapado del casino con tu amigo.\n\n"
+                    + "Resultado: Victoria.\n"
+                    + "Puedes iniciar otra partida con el boton Volver a jugar.");
         } else if (game.getState() == GameState.DEFEAT) {
-            showInfo("Derrota", "La partida ha terminado en derrota.");
+            showInfo("Derrota", "La partida ha terminado en derrota.\n\n"
+                    + "Vida final: " + game.getPlayer().getCurrentHealth() + "/" + game.getPlayer().getMaxHealth() + "\n"
+                    + "Turnos restantes: " + game.getTurnManager().getTurnsRemaining() + "\n\n"
+                    + "Puedes intentarlo de nuevo con el boton Volver a jugar.");
         }
     }
 

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "initialTurns": 125,
+  "initialTurns": 100,
   "initialRoomId": 1,
   "initialPlayerPosition": {
     "row": 3,
@@ -27,7 +27,7 @@
     ], "items": [
       { "id": "TOBACCO_PACK", "name": "Cajetilla de tabaco", "type": "CONSUMABLE", "effect": { "type": "MOVEMENT_BONUS", "amount": 1, "remainingTurns": 4 }, "row": 5, "column": 3 }
     ], "enemies": [
-      { "id": "SLOT_MACHINE_BROKEN", "name": "Maquina Tragaperras Averiada", "maxHealth": 35, "attack": 7, "defense": 2, "row": 3, "column": 4, "chipReward": 8, "dropName": "" }
+      { "id": "SLOT_MACHINE_BROKEN", "name": "Maquina Tragaperras Averiada", "maxHealth": 12, "attack": 3, "defense": 0, "row": 3, "column": 4, "chipReward": 8, "dropName": "" }
     ] },
     { "id": 3, "name": "Tesoreria / Caja Fuerte", "rows": 7, "columns": 7, "cells": [
       { "row": 6, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 2 },
@@ -36,7 +36,7 @@
       { "row": 5, "column": 5, "type": "OBSTACLE" }
     ], "items": [
       { "id": "GOLD_SUIT", "name": "Traje de oro", "type": "ARMOR", "defenseBonus": 6, "attackBonus": 2, "row": 3, "column": 2 },
-      { "id": "GYPSY_CANE", "name": "Baston gitano", "type": "WEAPON", "attackBonus": 9, "row": 3, "column": 4 }
+      { "id": "GYPSY_CANE", "name": "Baston gitano", "type": "WEAPON", "attackBonus": 8, "row": 3, "column": 4 }
     ] },
     { "id": 4, "name": "Blackjack", "rows": 7, "columns": 7, "cells": [
       { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 1 },
@@ -46,9 +46,9 @@
       { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 2, "type": "OBSTACLE" },
       { "row": 5, "column": 4, "type": "OBSTACLE" }
     ], "items": [
-      { "id": "SHARP_CARDS", "name": "Baraja afilada", "type": "WEAPON", "attackBonus": 9, "row": 3, "column": 4 }
+      { "id": "SHARP_CARDS", "name": "Baraja afilada", "type": "WEAPON", "attackBonus": 5, "row": 3, "column": 4 }
     ], "enemies": [
-      { "id": "BLACKJACK_DEALER", "name": "Crupier de Blackjack", "maxHealth": 45, "attack": 9, "defense": 4, "row": 3, "column": 2, "chipReward": 15, "dropName": "Traje con escudo" }
+      { "id": "BLACKJACK_DEALER", "name": "Crupier de Blackjack", "maxHealth": 14, "attack": 4, "defense": 1, "row": 3, "column": 2, "chipReward": 15, "dropName": "Traje con escudo" }
     ] },
     { "id": 5, "name": "Bar", "rows": 7, "columns": 7, "cells": [
       { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 2 },
@@ -61,7 +61,7 @@
       { "row": 3, "column": 1, "type": "OBSTACLE" }, { "row": 3, "column": 5, "type": "OBSTACLE" },
       { "row": 5, "column": 3, "type": "OBSTACLE" }
     ], "enemies": [
-      { "id": "AGGRESSIVE_DRUNK", "name": "Borracho Agresivo", "maxHealth": 30, "attack": 8, "defense": 2, "row": 4, "column": 3, "chipReward": 12, "dropName": "" }
+      { "id": "AGGRESSIVE_DRUNK", "name": "Borracho Agresivo", "maxHealth": 14, "attack": 4, "defense": 0, "row": 4, "column": 3, "chipReward": 12, "dropName": "" }
     ] },
     { "id": 6, "name": "Zona Privada", "rows": 7, "columns": 7, "cells": [
       { "row": 0, "column": 3, "type": "DOOR", "label": "Puerta", "destinationRoomId": 4 },
@@ -81,8 +81,8 @@
       { "row": 3, "column": 1, "type": "OBSTACLE" }, { "row": 3, "column": 5, "type": "OBSTACLE" },
       { "row": 5, "column": 3, "type": "OBSTACLE" }
     ], "enemies": [
-      { "id": "RUSSIAN_MAFIA", "name": "Mafioso Ruso", "maxHealth": 65, "attack": 12, "defense": 5, "row": 3, "column": 3, "chipReward": 35, "dropName": "" },
-      { "id": "VIP_THUG", "name": "Maton VIP", "maxHealth": 28, "attack": 8, "defense": 2, "row": 2, "column": 3, "chipReward": 10, "dropName": "" }
+      { "id": "RUSSIAN_MAFIA", "name": "Mafioso Ruso", "maxHealth": 30, "attack": 6, "defense": 2, "row": 3, "column": 3, "chipReward": 35, "dropName": "" },
+      { "id": "VIP_THUG", "name": "Maton VIP", "maxHealth": 22, "attack": 5, "defense": 2, "row": 2, "column": 3, "chipReward": 10, "dropName": "" }
     ] },
     { "id": 8, "name": "Ruleta / Final", "rows": 7, "columns": 7, "cells": [
       { "row": 3, "column": 0, "type": "DOOR", "label": "Puerta", "destinationRoomId": 7 },
