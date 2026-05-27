@@ -316,6 +316,10 @@ public class Game {
         return attackEnemyAt(target, nextRandomValue());
     }
 
+    public CombatResult attackEnemyAt(Position position) {
+        return attackEnemyAt(position, nextRandomValue());
+    }
+
     public CombatResult attackEnemyAt(Position position, double randomValue) {
         requireActionAvailable();
         requireAdjacentTo(position);
@@ -354,21 +358,13 @@ public class Game {
     }
 
     public Position findCurrentOrAdjacentInteractive() {
-        Position current = player.getPosition();
-        if (getCurrentRoom().getCell(current).isInteractive()) {
-            return current;
-        }
-        Position door = findCurrentOrAdjacentCellOfType(CellType.DOOR);
-        if (door != null) {
-            return door;
+        Position item = findCurrentOrAdjacentCellOfType(CellType.ITEM);
+        if (item != null) {
+            return item;
         }
         Position npc = findCurrentOrAdjacentCellOfType(CellType.NPC);
         if (npc != null) {
             return npc;
-        }
-        Position item = findCurrentOrAdjacentCellOfType(CellType.ITEM);
-        if (item != null) {
-            return item;
         }
         Position shop = findCurrentOrAdjacentCellOfType(CellType.SHOP);
         if (shop != null) {
@@ -382,7 +378,7 @@ public class Game {
         if (minigame != null) {
             return minigame;
         }
-        return findCurrentOrAdjacentCellOfType(CellType.TRAP);
+        return findCurrentOrAdjacentCellOfType(CellType.DOOR);
     }
 
     public Position findCurrentOrAdjacentCellOfType(CellType type) {

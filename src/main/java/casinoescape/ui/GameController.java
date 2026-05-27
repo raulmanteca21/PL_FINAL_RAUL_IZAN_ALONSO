@@ -94,7 +94,18 @@ public class GameController {
     private void handleCellClick(Position position) {
         try {
             Cell cell = game.getCurrentRoom().getCell(position);
-            if (cell.isInteractive()) {
+            if (cell.getType() == CellType.PLAYER) {
+                return;
+            }
+            if (cell.getType() == CellType.ENEMY) {
+                attackClickedEnemy(position);
+            } else if (cell.getType() == CellType.NPC && !isAdjacentToPlayer(position)) {
+                showInfo("Interaccion", "Acercate al NPC para interactuar.");
+            } else if (cell.getType() == CellType.SHOP && !isAdjacentToPlayer(position)) {
+                showInfo("Tienda", "Acercate al bar para comprar.");
+            } else if (cell.getType() == CellType.MINIGAME && !isAdjacentToPlayer(position)) {
+                showInfo("Ruleta rusa", "Acercate a la ruleta para interactuar.");
+            } else if (cell.isInteractive()) {
                 interactWith(position);
             } else {
                 game.movePlayer(position);
@@ -219,6 +230,11 @@ public class GameController {
 
     private void handleOpenShop() {
         try {
+            Position shopPosition = findCurrentOrAdjacentCellOfType(CellType.SHOP);
+            if (shopPosition == null) {
+                showInfo("Tienda", "No hay tienda adyacente. Acercate al bar para comprar.");
+                return;
+            }
             ChoiceDialog<String> dialog = new ChoiceDialog<>();
             dialog.setTitle("Bar / Tienda");
             dialog.setHeaderText("Compra con fichas de casino");
@@ -242,6 +258,11 @@ public class GameController {
 
     private void handleRussianRoulette() {
         try {
+            Position minigamePosition = findCurrentOrAdjacentCellOfType(CellType.MINIGAME);
+            if (minigamePosition == null) {
+                showInfo("Ruleta rusa", "No hay ruleta adyacente. Acercate para jugar.");
+                return;
+            }
             Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
             confirmation.setTitle("Ruleta rusa");
             confirmation.setHeaderText("Minijuego opcional de alto riesgo");
@@ -286,6 +307,29 @@ public class GameController {
         } else {
             showInfo("Interaccion", game.interactSimpleAt(target));
         }
+    }
+
+    private void attackClickedEnemy(Position position) {
+        if (!isAdjacentToPlayer(position)) {
+            showInfo("Combate", "Acercate al enemigo para atacar.");
+            return;
+        }
+        CombatResult result = game.attackEnemyAt(position);
+        String message = result.isDefenderDied()
+                ? "Enemigo derrotado. Dano: " + result.getDamageDealt()
+                : "Dano causado: " + result.getDamageDealt();
+        showInfo("Combate", message);
+    }
+
+    private boolean isAdjacentToPlayer(Position position) {
+        Position playerPosition = game.getPlayer().getPosition();
+        int rowDistance = absolute(playerPosition.getRow() - position.getRow());
+        int columnDistance = absolute(playerPosition.getColumn() - position.getColumn());
+        return rowDistance + columnDistance == 1;
+    }
+
+    private int absolute(int value) {
+        return value < 0 ? -value : value;
     }
 
     private Position findCurrentOrAdjacentInteractive() {
