@@ -46,7 +46,7 @@
       { "row": 3, "column": 3, "type": "OBSTACLE" }, { "row": 5, "column": 2, "type": "OBSTACLE" },
       { "row": 5, "column": 4, "type": "OBSTACLE" }
     ], "items": [
-      { "id": "SHARP_CARDS", "name": "Baraja afilada", "type": "WEAPON", "attackBonus": 40, "row": 3, "column": 4 }
+      { "id": "SHARP_CARDS", "name": "Baraja afilada", "type": "WEAPON", "attackBonus": 9, "row": 3, "column": 4 }
     ], "enemies": [
       { "id": "BLACKJACK_DEALER", "name": "Crupier de Blackjack", "maxHealth": 45, "attack": 9, "defense": 4, "row": 3, "column": 2, "chipReward": 15, "dropName": "Traje con escudo" }
     ] },
