@@ -56,48 +56,52 @@ public class RoomGridView {
     }
 
     private String symbolFor(Cell cell) {
+        if (cell.getDoor() != null) {
+            String prefix = cell.getDoor().isLocked() ? "LOCK" : "P";
+            return prefix + "->" + cell.getDoor().getDestinationRoomId();
+        }
         if (cell.getType() == CellType.EXIT) {
-            return "OUT";
+            return "SALIDA";
         }
         if (cell.getType() == CellType.SHOP) {
-            return "$";
+            return "BAR";
         }
         if (cell.getType() == CellType.MINIGAME) {
-            return "?";
+            return "RULETA";
         }
         return switch (cell.getType()) {
             case EMPTY -> ".";
             case OBSTACLE -> "#";
             case PLAYER -> "P";
             case ENEMY -> "E";
-            case ITEM -> "O";
-            case DOOR -> "D";
+            case ITEM -> "OBJ";
+            case DOOR -> "P";
             case NPC -> "N";
-            case TRAP -> "!";
-            case SHOP -> "$";
-            case EXIT -> "OUT";
-            case MINIGAME -> "?";
+            case TRAP -> "TRAP";
+            case SHOP -> "BAR";
+            case EXIT -> "SALIDA";
+            case MINIGAME -> "RULETA";
         };
     }
 
     private String styleFor(CellType type, boolean reachable) {
         String background = switch (type) {
-            case EMPTY -> reachable ? "#b7f7c3" : "#ffffff";
-            case OBSTACLE -> "#4f4f4f";
-            case PLAYER -> "#ffb347";
-            case ENEMY -> "#c0392b";
-            case ITEM -> "#f1c40f";
-            case DOOR -> "#6fa8dc";
-            case NPC -> "#f6b26b";
-            case TRAP -> "#e06666";
-            case SHOP -> "#ffe599";
-            case EXIT -> "#93c47d";
-            case MINIGAME -> "#b4a7d6";
+            case EMPTY -> reachable ? "#7bd88f" : "#f7fff7";
+            case OBSTACLE -> "#2f2f2f";
+            case PLAYER -> "#d4af37";
+            case ENEMY -> "#b51f1f";
+            case ITEM -> "#f1c232";
+            case DOOR -> "#3d85c6";
+            case NPC -> "#d98b2b";
+            case TRAP -> "#cc4125";
+            case SHOP -> "#ffd966";
+            case EXIT -> "#6aa84f";
+            case MINIGAME -> "#8e7cc3";
         };
         return "-fx-background-color: " + background + ";"
-                + "-fx-border-color: #008f4c;"
+                + "-fx-border-color: #0b2f24;"
                 + "-fx-border-width: 2;"
-                + "-fx-font-size: 18;"
+                + "-fx-font-size: 14;"
                 + "-fx-font-weight: bold;";
     }
 

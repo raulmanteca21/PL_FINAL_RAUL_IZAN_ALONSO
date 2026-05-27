@@ -1,5 +1,6 @@
 package casinoescape.ui;
 
+import casinoescape.game.Game;
 import casinoescape.movement.ShortestPathInfo;
 import casinoescape.structures.MyLinkedList;
 import javafx.scene.Node;
@@ -8,25 +9,30 @@ import javafx.scene.layout.VBox;
 
 public class RoutePanelView {
     private final VBox root = new VBox(6);
+    private final Label currentRoom = new Label();
+    private final Label connections = new Label();
     private final Label route = new Label();
     private final Label roomDistance = new Label();
     private final Label nextRoom = new Label();
     private final Label cellDistance = new Label();
 
     public RoutePanelView() {
-        root.setStyle("-fx-padding: 12; -fx-border-color: #0000ff; -fx-border-width: 3; -fx-background-color: #f4f8ff;");
-        Label title = new Label("Mapa / Ruta");
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+        root.setStyle("-fx-padding: 12; -fx-border-color: #d4af37; -fx-border-width: 3; -fx-background-color: #f4fff8;");
+        Label title = new Label("Plano del casino");
+        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #064f36;");
         route.setWrapText(true);
-        root.getChildren().addAll(title, route, roomDistance, nextRoom, cellDistance);
+        connections.setWrapText(true);
+        root.getChildren().addAll(title, currentRoom, connections, route, roomDistance, nextRoom, cellDistance);
     }
 
     public Node getNode() {
         return root;
     }
 
-    public void refresh(ShortestPathInfo info) {
-        route.setText("Ruta: " + formatPath(info.getRoomPath()));
+    public void refresh(Game game, ShortestPathInfo info) {
+        currentRoom.setText("Sala actual: " + game.getCurrentRoom().getId() + " - " + game.getCurrentRoom().getName());
+        connections.setText("Conexiones: " + formatPath(game.getMap().getConnectedRooms(game.getCurrentRoom().getId())));
+        route.setText("Ruta recomendada: " + formatPath(info.getRoomPath()));
         roomDistance.setText("Distancia salas: " + formatDistance(info.getRoomDistance()));
         nextRoom.setText("Siguiente sala: " + (info.getRecommendedNextRoomId() == ShortestPathInfo.NO_RECOMMENDED_ROOM
                 ? "salida/actual" : String.valueOf(info.getRecommendedNextRoomId())));

@@ -12,9 +12,9 @@ public class LogPanelView {
     private final TextArea logArea = new TextArea();
 
     public LogPanelView() {
-        root.setStyle("-fx-padding: 12; -fx-border-color: #f1c40f; -fx-border-width: 3; -fx-background-color: #fffde7;");
-        Label title = new Label("Mensajes");
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+        root.setStyle("-fx-padding: 12; -fx-border-color: #d4af37; -fx-border-width: 3; -fx-background-color: #fff8df;");
+        Label title = new Label("Registro de la mesa");
+        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5c2300;");
         logArea.setEditable(false);
         logArea.setWrapText(true);
         logArea.setPrefHeight(430);

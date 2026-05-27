@@ -357,6 +357,24 @@ public class Game {
         return movementService.calculateReachableCells(getCurrentRoom(), player);
     }
 
+    public boolean canMovePlayerInLine() {
+        return turnManager.canMove() && inventory.hasActiveEffect(EffectType.LINE_MOVEMENT);
+    }
+
+    public boolean canUseAdjacentShop() {
+        return turnManager.canAct()
+                && player.getCurrentRoomId() == 5
+                && getCurrentRoom().getCell(CasinoMapBuilder.BAR_SHOP_POSITION).getType() == CellType.SHOP
+                && isOrthogonallyAdjacent(player.getPosition(), CasinoMapBuilder.BAR_SHOP_POSITION);
+    }
+
+    public boolean canPlayAdjacentMinigame() {
+        return turnManager.canAct()
+                && player.getCurrentRoomId() == CasinoMap.EXIT_ROOM_ID
+                && getCurrentRoom().getCell(CasinoMapBuilder.RUSSIAN_ROULETTE_POSITION).getType() == CellType.MINIGAME
+                && isOrthogonallyAdjacent(player.getPosition(), CasinoMapBuilder.RUSSIAN_ROULETTE_POSITION);
+    }
+
     public Position findCurrentOrAdjacentInteractive() {
         Position item = findCurrentOrAdjacentCellOfType(CellType.ITEM);
         if (item != null) {

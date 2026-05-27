@@ -8,8 +8,10 @@ import casinoescape.items.ShopItem;
 import casinoescape.movement.Direction;
 import casinoescape.model.Cell;
 import casinoescape.model.CellType;
+import casinoescape.model.Enemy;
 import casinoescape.model.GameState;
 import casinoescape.model.Position;
+import casinoescape.persistence.GameConfigLoader;
 import casinoescape.persistence.GameSaveLoader;
 import casinoescape.persistence.GameSaveWriter;
 import casinoescape.structures.MyLinkedList;
@@ -24,6 +26,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 public class GameController {
+    private static final Path CONFIG_PATH = Path.of("config", "game_config.json");
     private static final Path DEFAULT_SAVE_PATH = Path.of("saves", "savegame.json");
 
     private Game game;
@@ -46,7 +49,7 @@ public class GameController {
     public Parent createView() {
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(14));
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle("-fx-background-color: #0b2f24;");
 
         VBox leftPanel = new VBox(12, playerPanelView.getNode(), inventoryPanelView.getNode());
         leftPanel.setPrefWidth(245);
@@ -68,7 +71,7 @@ public class GameController {
         roomGridView.refresh(game.getCurrentRoom(), reachableCells);
         playerPanelView.refresh(game);
         inventoryPanelView.refresh(game.getInventory());
-        routePanelView.refresh(game.getShortestPathInfo());
+        routePanelView.refresh(game, game.getShortestPathInfo());
         logPanelView.refresh(game.getLog());
         actionPanelView.refresh(game);
         checkEndState();
@@ -89,6 +92,7 @@ public class GameController {
         actionPanelView.setOnRoulette(this::handleRussianRoulette);
         actionPanelView.setOnSave(this::handleSave);
         actionPanelView.setOnLoad(this::handleLoad);
+        actionPanelView.setOnReplay(this::handleReplay);
     }
 
     private void handleCellClick(Position position) {
@@ -98,7 +102,7 @@ public class GameController {
                 return;
             }
             if (cell.getType() == CellType.ENEMY) {
-                attackClickedEnemy(position);
+                showEnemyStats(position);
             } else if (cell.getType() == CellType.NPC && !isAdjacentToPlayer(position)) {
                 showInfo("Interaccion", "Acercate al NPC para interactuar.");
             } else if (cell.getType() == CellType.SHOP && !isAdjacentToPlayer(position)) {
@@ -298,6 +302,16 @@ public class GameController {
         }
     }
 
+    private void handleReplay() {
+        try {
+            game = new GameConfigLoader().load(CONFIG_PATH);
+            lastAnnouncedEndState = GameState.IN_PROGRESS;
+            refreshAll();
+        } catch (RuntimeException exception) {
+            showError(exception);
+        }
+    }
+
     private void interactWith(Position target) {
         Cell cell = game.getCurrentRoom().getCell(target);
         if (cell.getType() == CellType.SHOP) {
@@ -309,16 +323,19 @@ public class GameController {
         }
     }
 
-    private void attackClickedEnemy(Position position) {
-        if (!isAdjacentToPlayer(position)) {
-            showInfo("Combate", "Acercate al enemigo para atacar.");
+    private void showEnemyStats(Position position) {
+        Enemy enemy = game.getCurrentRoom().findEnemyAt(position);
+        if (enemy == null) {
+            showInfo("Enemigo", "No hay enemigo vivo en esta casilla.");
             return;
         }
-        CombatResult result = game.attackEnemyAt(position);
-        String message = result.isDefenderDied()
-                ? "Enemigo derrotado. Dano: " + result.getDamageDealt()
-                : "Dano causado: " + result.getDamageDealt();
-        showInfo("Combate", message);
+        String message = "Enemigo: " + enemy.getName()
+                + "\nVida: " + enemy.getCurrentHealth() + "/" + enemy.getMaxHealth()
+                + "\nAtaque: " + enemy.getAttack()
+                + "\nEscudo: " + enemy.getDefense()
+                + "\nMovimiento: aproximacion por BFS"
+                + "\n\nPara combatir usa el boton Atacar.";
+        showInfo("Estadisticas de enemigo", message);
     }
 
     private boolean isAdjacentToPlayer(Position position) {

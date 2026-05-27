@@ -15,9 +15,9 @@ public class InventoryPanelView {
     private Inventory inventory;
 
     public InventoryPanelView() {
-        root.setStyle("-fx-padding: 12; -fx-border-color: #f39c12; -fx-border-width: 3; -fx-background-color: #fffaf0;");
-        Label title = new Label("Inventario");
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+        root.setStyle("-fx-padding: 12; -fx-border-color: #d4af37; -fx-border-width: 3; -fx-background-color: #fff8df;");
+        Label title = new Label("Caja de fichas");
+        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5c2300;");
         items.setPrefHeight(170);
         root.getChildren().addAll(title, equippedWeapon, equippedArmor, items);
     }
