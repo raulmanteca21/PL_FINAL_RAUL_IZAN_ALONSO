@@ -1,0 +1,74 @@
+@startuml
+title Casino Escape - Diagrama de casos de uso
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor Jugador
+actor "Sistema de archivos" as Files
+
+rectangle "Casino Escape" {
+  usecase "Iniciar partida" as UC_Start
+  usecase "Cargar configuracion inicial" as UC_Config
+  usecase "Ver estado de partida" as UC_ViewState
+  usecase "Ver inventario" as UC_ViewInventory
+  usecase "Ver ruta minima" as UC_ViewRoute
+  usecase "Mover jugador" as UC_Move
+  usecase "Calcular celdas alcanzables" as UC_Reachable
+  usecase "Interactuar con celda" as UC_Interact
+  usecase "Recoger objeto" as UC_Pick
+  usecase "Usar objeto" as UC_UseItem
+  usecase "Equipar arma o armadura" as UC_Equip
+  usecase "Atacar enemigo" as UC_Attack
+  usecase "Calcular dano" as UC_Damage
+  usecase "Abrir puerta" as UC_Door
+  usecase "Cambiar de habitacion" as UC_ChangeRoom
+  usecase "Finalizar turno" as UC_EndTurn
+  usecase "Procesar enemigos" as UC_Enemies
+  usecase "Guardar partida" as UC_Save
+  usecase "Cargar partida" as UC_Load
+  usecase "Comprobar victoria" as UC_Victory
+  usecase "Comprobar derrota" as UC_Defeat
+}
+
+Jugador --> UC_Start
+Jugador --> UC_ViewState
+Jugador --> UC_ViewInventory
+Jugador --> UC_ViewRoute
+Jugador --> UC_Move
+Jugador --> UC_Interact
+Jugador --> UC_UseItem
+Jugador --> UC_Equip
+Jugador --> UC_Attack
+Jugador --> UC_Door
+Jugador --> UC_EndTurn
+Jugador --> UC_Save
+Jugador --> UC_Load
+
+Files --> UC_Config
+Files --> UC_Save
+Files --> UC_Load
+
+UC_Start .> UC_Config : <<include>>
+UC_Move .> UC_Reachable : <<include>>
+UC_Attack .> UC_Damage : <<include>>
+UC_Door .> UC_ChangeRoom : <<include>>
+UC_EndTurn .> UC_Enemies : <<include>>
+UC_Interact .> UC_Pick : <<extend>>
+UC_Interact .> UC_Door : <<extend>>
+UC_Interact .> UC_Victory : <<extend>>
+UC_EndTurn .> UC_Defeat : <<extend>>
+UC_Attack .> UC_Defeat : <<extend>>
+UC_Load .> UC_Config : <<include>>
+
+note right of UC_Victory
+  Victoria: salida exterior en sala 8
+  con amigo rescatado.
+end note
+
+note right of UC_Defeat
+  Derrota: vida 0, turnos agotados
+  o ruleta rusa desfavorable.
+end note
+
+@enduml

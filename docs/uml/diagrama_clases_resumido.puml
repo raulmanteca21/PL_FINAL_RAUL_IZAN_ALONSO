@@ -1,0 +1,331 @@
+@startuml
+title Casino Escape - Diagrama de clases resumido
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "casinoescape.ui" {
+  class GameController <<JavaFX Controller>> {
+    - game: Game
+    + refreshAll()
+  }
+}
+
+package "casinoescape.game" {
+  class Game {
+    - map: CasinoMap
+    - player: Player
+    - inventory: Inventory
+    - turnManager: TurnManager
+    - movementService: MovementService
+    - pathFinder: PathFinder
+    - combatService: CombatService
+    - barShop: Shop
+    - log: GameLog
+    + movePlayer(destination: Position)
+    + attackAdjacentEnemy(): CombatResult
+    + pickUpAdjacentItem(): Item
+    + useItem(itemId: String)
+    + useDoorAt(doorPosition: Position)
+    + endTurn()
+    + getReachableCells(): MyLinkedList<Position>
+    + getState(): GameState
+  }
+
+  class TurnManager {
+    - turnsRemaining: int
+    - movementUsed: boolean
+    - actionUsed: boolean
+    - phase: TurnPhase
+    - gameState: GameState
+    + canMove(): boolean
+    + registerMovement()
+    + canAct(): boolean
+    + registerAction()
+    + startEnemyPhase(player: Player): boolean
+    + finishEnemyPhase(player: Player)
+    + markVictory()
+    + markDefeat()
+  }
+
+  enum TurnPhase {
+    PLAYER_TURN
+    ENEMY_PHASE
+  }
+}
+
+package "casinoescape.model" {
+  class Player {
+    - maxHealth: int
+    - currentHealth: int
+    - attack: int
+    - defense: int
+    - movementPoints: int
+    - chips: int
+    - currentRoomId: int
+    - position: Position
+    - friendRescued: boolean
+    + rescueFriend()
+    + isAlive(): boolean
+  }
+
+  class CasinoMap {
+    - roomGraph: MyGraph<Integer>
+    - rooms: MyLinkedList<Room>
+    - initialRoomId: int
+    - initialPlayerPosition: Position
+    + getRoom(roomId: int): Room
+    + getConnectedRooms(roomId: int): MyLinkedList<Integer>
+    + canTransition(fromRoomId: int, toRoomId: int, hasTreasuryKey: boolean): boolean
+  }
+
+  class Room {
+    - id: int
+    - name: String
+    - cells: MyMatrix<Cell>
+    - enemies: MyLinkedList<Enemy>
+    - items: MyLinkedList<RoomItem>
+    + getCell(position: Position): Cell
+    + isWalkable(position: Position): boolean
+    + addEnemy(enemy: Enemy)
+    + moveEnemy(enemy: Enemy, destination: Position)
+    + addItem(item: Item, position: Position)
+    + removeItemAt(position: Position): Item
+  }
+
+  class Cell {
+    - type: CellType
+    - label: String
+    - door: Door
+    + isWalkable(): boolean
+    + isInteractive(): boolean
+  }
+
+  class Door {
+    - destinationRoomId: int
+    - locked: boolean
+    - requiredKeyName: String
+    + canPass(hasRequiredKey: boolean): boolean
+  }
+
+  class Enemy {
+    - id: String
+    - name: String
+    - currentHealth: int
+    - attack: int
+    - defense: int
+    - position: Position
+    - chipReward: int
+    + isAlive(): boolean
+  }
+
+  class Position {
+    - row: int
+    - column: int
+  }
+
+  enum GameState {
+    IN_PROGRESS
+    VICTORY
+    DEFEAT
+  }
+
+  enum CellType
+}
+
+package "casinoescape.items" {
+  abstract class Item {
+    - id: String
+    - name: String
+    - type: ItemType
+  }
+
+  class Weapon {
+    - attackBonus: int
+  }
+
+  class Armor {
+    - defenseBonus: int
+    - attackBonus: int
+  }
+
+  class Consumable {
+    - effect: Effect
+  }
+
+  class KeyItem
+
+  class Inventory {
+    - items: MyLinkedList<Item>
+    - activeEffects: MyLinkedList<Effect>
+    - equippedWeapon: Weapon
+    - equippedArmor: Armor
+    + addItem(item: Item, player: Player)
+    + useConsumable(itemId: String, player: Player)
+    + equipWeapon(itemId: String, player: Player)
+    + equipArmor(itemId: String, player: Player)
+    + hasTreasuryKey(): boolean
+  }
+
+  class Shop {
+    - items: MyLinkedList<ShopItem>
+    + buy(shopItemId: String, player: Player, inventory: Inventory): Item
+  }
+
+  class Effect
+  class ShopItem
+  enum ItemType
+}
+
+package "casinoescape.movement" {
+  class MovementService {
+    - reachableCellsCalculator: ReachableCellsCalculator
+    + canMove(room: Room, player: Player, destination: Position): boolean
+    + calculateReachableCells(room: Room, player: Player): MyLinkedList<Position>
+    + movePlayer(room: Room, player: Player, destination: Position)
+  }
+
+  class ReachableCellsCalculator {
+    + calculate(room: Room, start: Position, movementPoints: int): MyLinkedList<Position>
+    + isReachable(room: Room, start: Position, destination: Position, movementPoints: int): boolean
+  }
+
+  class PathFinder {
+    + calculatePathToExit(map: CasinoMap, player: Player, hasTreasuryKey: boolean): ShortestPathInfo
+    + findRoomPathToExit(map: CasinoMap, currentRoomId: int, hasTreasuryKey: boolean): MyLinkedList<Integer>
+    + findCellPath(room: Room, start: Position, goal: Position): MyLinkedList<Position>
+  }
+}
+
+package "casinoescape.combat" {
+  class CombatService {
+    - damageCalculator: DamageCalculator
+    + playerAttacksEnemy(player: Player, enemy: Enemy, randomValue: double): CombatResult
+    + enemyAttacksPlayer(enemy: Enemy, player: Player, randomValue: double): CombatResult
+    + areAdjacent(first: Position, second: Position): boolean
+  }
+
+  class DamageCalculator {
+    + calculateDamage(attack: int, defense: int, randomValue: double): int
+  }
+
+  class CombatResult
+}
+
+package "casinoescape.persistence" {
+  class GameConfigLoader {
+    + load(path: Path): Game
+  }
+
+  class GameSaveWriter {
+    + save(game: Game, path: Path)
+  }
+
+  class GameSaveLoader {
+    + load(path: Path): Game
+  }
+}
+
+package "casinoescape.logging" {
+  class GameLog {
+    - entries: MyLinkedList<LogEntry>
+    + add(message: String)
+    + getEntry(index: int): LogEntry
+    + size(): int
+  }
+
+  class LogEntry
+}
+
+package "casinoescape.structures" {
+  class MyLinkedList<T>
+  class MyMatrix<T>
+  class MyGraph<T>
+  class MyQueue<T>
+  class MyStack<T>
+}
+
+GameController --> Game
+GameController ..> GameConfigLoader
+GameController ..> GameSaveWriter
+GameController ..> GameSaveLoader
+
+Game *-- CasinoMap
+Game *-- Player
+Game *-- Inventory
+Game *-- TurnManager
+Game *-- Shop
+Game *-- GameLog
+Game --> MovementService
+Game --> PathFinder
+Game --> CombatService
+Game --> Room
+Game --> Enemy
+
+TurnManager --> TurnPhase
+TurnManager --> GameState
+
+CasinoMap *-- "1" MyGraph
+CasinoMap *-- "1" MyLinkedList
+CasinoMap o-- "many" Room
+CasinoMap --> Position
+
+Room *-- MyMatrix
+Room *-- MyLinkedList
+Room o-- "many" Cell
+Room o-- "many" Enemy
+Room ..> Item
+Cell --> CellType
+Cell o-- Door
+Enemy --> Position
+Player --> Position
+
+Inventory *-- MyLinkedList
+Inventory o-- Item
+Inventory --> Weapon
+Inventory --> Armor
+Inventory --> Effect
+Shop *-- MyLinkedList
+Shop o-- ShopItem
+Shop ..> Player
+Shop ..> Inventory
+ShopItem ..> Item
+
+Item <|-- Weapon
+Item <|-- Armor
+Item <|-- Consumable
+Item <|-- KeyItem
+Item --> ItemType
+Consumable *-- Effect
+
+MovementService *-- ReachableCellsCalculator
+MovementService ..> Room
+MovementService ..> Player
+ReachableCellsCalculator ..> MyQueue
+ReachableCellsCalculator ..> MyMatrix
+ReachableCellsCalculator ..> MyLinkedList
+PathFinder ..> MyQueue
+PathFinder ..> MyStack
+PathFinder ..> MyLinkedList
+PathFinder ..> CasinoMap
+
+CombatService *-- DamageCalculator
+CombatService ..> Player
+CombatService ..> Enemy
+CombatService ..> CombatResult
+
+GameLog *-- MyLinkedList
+GameLog o-- LogEntry
+
+GameConfigLoader ..> Game
+GameSaveWriter ..> Game
+GameSaveLoader ..> Game
+
+note bottom of MyLinkedList
+  Estructuras propias usadas para evitar
+  ArrayList, HashMap, LinkedList, Queue,
+  Stack y equivalentes de java.util.
+end note
+
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+title Casino Escape - Secuencia de movimiento del jugador
+
+actor Jugador
+participant "GameController" as Controller
+participant "Game" as Game
+participant "TurnManager" as Turn
+participant "MovementService" as Move
+participant "ReachableCellsCalculator" as Reach
+participant "MyQueue<SearchNode>" as Queue
+participant "MyMatrix<Boolean>" as Matrix
+participant "MyLinkedList<Position>" as List
+participant "Room" as Room
+participant "Player" as Player
+participant "GameLog" as Log
+participant "Vistas JavaFX" as Views
+
+Jugador -> Controller : click en celda destino
+Controller -> Game : movePlayer(destination)
+Game -> Turn : canMove()
+Turn --> Game : true
+Game -> Game : getCurrentRoom()
+Game -> Move : canMove(room, player, destination)
+Move -> Reach : isReachable(room, player.position, destination, movementPoints)
+Reach -> Reach : calculate(room, start, movementPoints)
+Reach -> Matrix : new(rows, columns)
+Reach -> Queue : enqueue(start)
+loop BFS ortogonal
+  Reach -> Queue : dequeue()
+  Reach -> Matrix : marcar visitado
+  Reach -> Room : isWalkable(position)
+  Reach -> List : add(position alcanzable)
+  Reach -> Queue : enqueue(vecino)
+end
+Reach --> Move : destino alcanzable
+Move --> Game : true
+Game -> Room : getCell(destination)
+Game -> Move : movePlayer(room, player, destination)
+Move -> Room : setCellType(origen, EMPTY)
+Move -> Player : setPosition(destination)
+Move -> Room : setCellType(destination, PLAYER)
+Game -> Turn : registerMovement()
+Game -> Log : add("Movimiento del jugador...")
+Game --> Controller : movimiento completado
+Controller -> Controller : refreshAll()
+Controller -> Views : refrescar sala, jugador, inventario, ruta y log
+
+alt destino invalido o movimiento no disponible
+  Game --> Controller : InvalidMoveException
+  Controller -> Views : mostrar error
+end
+
+@enduml

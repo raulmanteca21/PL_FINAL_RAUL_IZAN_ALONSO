@@ -1,0 +1,55 @@
+@startuml
+title Casino Escape - Estados de partida y turnos
+
+[*] --> CargandoConfiguracion
+CargandoConfiguracion --> TurnoJugador : GameConfigLoader.load()
+
+state "IN_PROGRESS" as InProgress {
+  [*] --> TurnoJugador
+
+  state "Turno del jugador" as TurnoJugador {
+    [*] --> EsperandoDecision
+    EsperandoDecision --> MovimientoUsado : movePlayer()
+    EsperandoDecision --> AccionUsada : accion sin movimiento
+    MovimientoUsado --> AccionDisponible : registerMovement()
+    AccionDisponible --> AccionUsada : atacar / recoger / usar / equipar / interactuar
+    AccionDisponible --> FinTurnoSolicitado : endTurn()
+    EsperandoDecision --> FinTurnoSolicitado : endTurn()
+    AccionUsada --> FinTurnoSolicitado : jugador termina turno
+    AccionUsada --> FinTurnoSolicitado : abrir puerta valida
+  }
+
+  FinTurnoSolicitado --> FaseEnemigos : startEnemyPhase()
+
+  state "Fase enemigos" as FaseEnemigos {
+    [*] --> ProcesandoEnemigos
+    ProcesandoEnemigos --> ProcesandoEnemigos : enemigo se mueve o ataca
+    ProcesandoEnemigos --> [*] : todos procesados
+  }
+
+  FaseEnemigos --> ActualizarEfectos : finishEnemyPhase()
+  ActualizarEfectos --> TurnoJugador : quedan turnos y vida
+
+  TurnoJugador --> Guardando : guardar partida
+  Guardando --> TurnoJugador : guardado correcto
+  TurnoJugador --> CargandoPartida : cargar partida
+  CargandoPartida --> TurnoJugador : estado cargado IN_PROGRESS
+}
+
+InProgress --> VICTORY : salida sala 8 + amigo rescatado
+InProgress --> DEFEAT : vida 0
+InProgress --> DEFEAT : turnos agotados
+InProgress --> DEFEAT : ruleta rusa desfavorable
+CargandoPartida --> VICTORY : estado cargado VICTORY
+CargandoPartida --> DEFEAT : estado cargado DEFEAT
+
+VICTORY --> [*]
+DEFEAT --> [*]
+
+note right of InProgress
+  Equivale a GameState.IN_PROGRESS.
+  Las fases internas se apoyan en TurnPhase,
+  movementUsed y actionUsed de TurnManager.
+end note
+
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+title Casino Escape - Secuencia de cambio de habitacion
+
+actor Jugador
+participant "GameController" as Controller
+participant "Game" as Game
+participant "Room" as Room
+participant "Cell" as Cell
+participant "Door" as Door
+participant "CasinoMap" as Map
+participant "Inventory" as Inventory
+participant "Player" as Player
+participant "TurnManager" as Turn
+participant "GameLog" as Log
+participant "Vistas JavaFX" as Views
+
+Jugador -> Controller : usar puerta adyacente
+Controller -> Game : useDoorAt(doorPosition)
+Game -> Game : getCurrentRoom()
+Game -> Room : getCell(doorPosition)
+Room --> Game : Cell
+Game -> Cell : getDoor()
+Cell --> Game : Door
+Game -> Game : validar adyacencia
+Game -> Door : getDestinationRoomId()
+Door --> Game : destinationRoomId
+Game -> Inventory : hasTreasuryKey()
+Inventory --> Game : boolean
+Game -> Map : canTransition(origen, destino, hasTreasuryKey)
+Map -> Door : canPass(hasTreasuryKey)
+Door --> Map : permitido
+Map --> Game : true
+Game -> Room : setCellType(posicionActual, EMPTY)
+Game -> Game : findEntryPosition(destino, origen)
+Game -> Player : setCurrentRoomId(destino)
+Game -> Player : setPosition(entryPosition)
+Game -> Map : getRoom(destino)
+Map --> Game : Room destino
+Game -> Room : setCellType(entryPosition, PLAYER)
+Game -> Turn : registerAction()
+Game -> Log : add("Cambio de sala origen -> destino")
+Game -> Game : endTurn()
+Game --> Controller : cambio completado
+Controller -> Views : refreshAll()
+
+alt puerta bloqueada o invalida
+  Map --> Game : false
+  Game -> Log : add("Intento de abrir puerta bloqueada...")
+  Game --> Controller : LockedDoorException
+  Controller -> Views : mostrar error
+end
+
+@enduml

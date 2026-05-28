@@ -1,0 +1,90 @@
+@startuml
+title Casino Escape - Actividad de turno del jugador
+
+start
+:Mostrar habitacion, estado, inventario, ruta y log;
+
+if (GameState == IN_PROGRESS?) then (si)
+  :Inicio de TurnPhase.PLAYER_TURN;
+else (no)
+  stop
+endif
+
+if (Jugador quiere moverse?) then (si)
+  :Calcular celdas alcanzables con BFS;
+  if (Destino valido y movimiento disponible?) then (si)
+    :Mover jugador;
+    :Registrar movimiento en TurnManager;
+    :Anadir evento a GameLog;
+    if (Pisa trampa?) then (si)
+      :Aplicar dano de trampa;
+    endif
+  else (no)
+    :Mostrar error de movimiento;
+  endif
+endif
+
+if (Jugador quiere realizar accion?) then (si)
+  if (Accion disponible?) then (si)
+    switch (Tipo de accion)
+      case (Recoger objeto)
+        :Recoger objeto adyacente;
+        :Anadir a Inventory;
+      case (Usar objeto)
+        :Aplicar consumible o efecto;
+      case (Equipar)
+        :Equipar Weapon o Armor;
+      case (Atacar)
+        :Validar enemigo adyacente;
+        :Calcular dano con CombatService;
+      case (Comprar)
+        :Comprar en Shop;
+      case (Abrir puerta)
+        :Validar Door con CasinoMap;
+        :Cambiar Room;
+      case (Interactuar)
+        :NPC, salida, minijuego o celda especial;
+    endswitch
+    :Registrar accion en TurnManager;
+    :Anadir evento a GameLog;
+  else (no)
+    :Mostrar error de accion;
+  endif
+endif
+
+if (Victoria?) then (si)
+  :TurnManager.markVictory();
+  stop
+endif
+
+if (Derrota?) then (si)
+  :TurnManager.markDefeat();
+  stop
+endif
+
+if (Fin de turno?) then (si)
+  :Procesar fase de enemigos;
+  while (Quedan enemigos vivos en la sala?) is (si)
+    if (Enemigo adyacente al jugador?) then (si)
+      :Enemigo ataca jugador;
+      :Calcular dano;
+    else (no)
+      :Mover enemigo hacia jugador con BFS;
+    endif
+    if (Jugador sin vida?) then (si)
+      :Marcar derrota;
+      stop
+    endif
+  endwhile (no)
+  :Aplicar efectos ambientales;
+  :Reducir efectos temporales del inventario;
+  :Reducir turnos restantes;
+  if (Quedan turnos?) then (si)
+    :Nuevo turno del jugador;
+  else (no)
+    :Marcar derrota por turnos agotados;
+  endif
+endif
+
+stop
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+title Casino Escape - Secuencia de guardado de partida
+
+actor Jugador
+participant "GameController" as Controller
+participant "GameSaveWriter" as Writer
+participant "Game" as Game
+participant "Player" as Player
+participant "TurnManager" as Turn
+participant "Inventory" as Inventory
+participant "CasinoMap" as Map
+participant "GameLog" as Log
+participant "PersistenceData.SaveGameData" as Data
+participant "Gson" as Gson
+participant "Sistema de archivos" as Files
+
+Jugador -> Controller : pulsa Guardar
+Controller -> Writer : save(game, DEFAULT_SAVE_PATH)
+Writer -> Game : getState()
+Writer -> Game : getPlayer()
+Writer -> Player : leer sala, posicion, vida, stats, fichas, amigoRescatado
+Writer -> Game : getTurnManager()
+Writer -> Turn : leer turnos, fase, movimiento y accion usados
+Writer -> Game : getInventory()
+Writer -> Inventory : leer objetos, equipo y efectos activos
+Writer -> Game : getMap()
+Writer -> Map : leer enemigos, puertas y objetos recogidos
+Writer -> Game : getLog()
+Writer -> Log : leer entradas del log
+Writer -> Data : construir SaveGameData
+Writer -> Gson : toJson(data)
+Writer -> Files : createDirectories(parent)
+Writer -> Files : writeString(path, json)
+Writer --> Controller : guardado correcto
+Controller -> Controller : refreshAll()
+
+alt error de E/S
+  Files --> Writer : IOException
+  Writer --> Controller : PersistenceException
+  Controller -> Controller : mostrar error
+end
+
+@enduml
