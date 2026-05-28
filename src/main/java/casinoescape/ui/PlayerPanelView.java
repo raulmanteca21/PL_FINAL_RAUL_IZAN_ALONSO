@@ -19,12 +19,19 @@ public class PlayerPanelView {
     private final Label result = new Label();
 
     public PlayerPanelView() {
-        root.setStyle("-fx-padding: 12; -fx-border-color: #d4af37; -fx-border-width: 3; -fx-background-color: #fff8df;");
-        Label title = new Label("Mesa del jugador");
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5c2300;");
+        root.setStyle("-fx-padding: 12; -fx-border-color: #D4AF37; -fx-border-width: 3; -fx-background-color: #FFF4D6;");
+        Label title = new Label("♠ Mesa del jugador");
+        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5A1717;");
+        styleInfoLabel(room);
+        styleInfoLabel(health);
+        styleInfoLabel(attack);
+        styleInfoLabel(defense);
+        styleInfoLabel(movement);
+        styleInfoLabel(chips);
+        styleInfoLabel(turns);
         result.setVisible(false);
         result.setManaged(false);
-        result.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #8a1c1c;");
+        result.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #8B1E1E;");
         root.getChildren().addAll(title, room, health, attack, defense, movement, chips, turns, result);
     }
 
@@ -34,14 +41,19 @@ public class PlayerPanelView {
 
     public void refresh(Game game) {
         Player player = game.getPlayer();
-        room.setText("Sala: " + player.getCurrentRoomId() + " - " + game.getCurrentRoom().getName());
-        health.setText("Vida: " + player.getCurrentHealth() + "/" + player.getMaxHealth());
-        attack.setText("Ataque: " + player.getAttack());
-        defense.setText("Defensa/Escudo: " + player.getDefense());
+        room.setText("Mesa: Sala " + player.getCurrentRoomId() + " - " + game.getCurrentRoom().getName());
+        health.setText("♥ Vida: " + player.getCurrentHealth() + "/" + player.getMaxHealth());
+        attack.setText("♦ Ataque: " + player.getAttack());
+        defense.setText("♣ Escudo: " + player.getDefense());
         movement.setText("Movimiento: " + player.getMovementPoints());
-        chips.setText("Fichas: " + player.getChips());
+        chips.setText("$ Fichas: " + player.getChips());
         turns.setText("Turnos: " + game.getTurnManager().getTurnsRemaining());
         refreshResult(game.getState());
+    }
+
+    private void styleInfoLabel(Label label) {
+        label.setWrapText(true);
+        label.setStyle("-fx-font-size: 13; -fx-text-fill: #17130A;");
     }
 
     private void refreshResult(GameState state) {

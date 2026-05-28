@@ -1,41 +1,517 @@
 {
   "version": 1,
-  "state": "IN_PROGRESS",
+  "state": "VICTORY",
   "player": {
-    "currentRoomId": 1,
-    "row": 3,
+    "currentRoomId": 8,
+    "row": 1,
     "column": 3,
-    "maxHealth": 100,
-    "currentHealth": 100,
-    "attack": 10,
-    "defense": 5,
+    "maxHealth": 30,
+    "currentHealth": 18,
+    "attack": 9,
+    "defense": 3,
     "movementPoints": 3,
-    "chips": 0,
-    "friendRescued": false
+    "chips": 47,
+    "friendRescued": true
   },
   "turn": {
-    "turnsRemaining": 30,
+    "turnsRemaining": 57,
     "movementUsed": false,
-    "actionUsed": false,
-    "enemyPhaseProcessedLastTurn": false,
+    "actionUsed": true,
+    "enemyPhaseProcessedLastTurn": true,
     "phase": "PLAYER_TURN"
   },
   "inventory": {
-    "items": [],
-    "equippedWeaponId": "",
-    "equippedArmorId": "",
+    "items": [
+      {
+        "id": "BROKEN_BOTTLE",
+        "name": "Botella rota",
+        "type": "WEAPON",
+        "attackBonus": 3,
+        "defenseBonus": 0
+      },
+      {
+        "id": "SHARP_CARDS",
+        "name": "Baraja afilada",
+        "type": "WEAPON",
+        "attackBonus": 5,
+        "defenseBonus": 0
+      },
+      {
+        "id": "SHIELD_SUIT",
+        "name": "Traje con escudo",
+        "type": "ARMOR",
+        "attackBonus": 0,
+        "defenseBonus": 4
+      },
+      {
+        "id": "SUSPICIOUS_PILL",
+        "name": "Pastilla de dudosa procedencia",
+        "type": "CONSUMABLE",
+        "attackBonus": 0,
+        "defenseBonus": 0,
+        "effect": {
+          "type": "LINE_MOVEMENT",
+          "amount": 0,
+          "remainingTurns": 7
+        }
+      },
+      {
+        "id": "BOUNCER_VEST",
+        "name": "Chaleco de portero",
+        "type": "ARMOR",
+        "attackBonus": 0,
+        "defenseBonus": 3
+      }
+    ],
+    "equippedWeaponId": "SHARP_CARDS",
+    "equippedArmorId": "BOUNCER_VEST",
     "activeEffects": []
   },
   "interactives": {
-    "welcomeNpcInteracted": false,
-    "barSpecialNpcInteracted": false,
-    "friendNpcInteracted": false
+    "welcomeNpcInteracted": true,
+    "barSpecialNpcInteracted": true,
+    "friendNpcInteracted": true
   },
-  "enemies": [],
-  "collectedObjectIds": [],
+  "enemies": [
+    {
+      "id": "SLOT_MACHINE_BROKEN",
+      "roomId": 2,
+      "row": 3,
+      "column": 4,
+      "currentHealth": 12,
+      "alive": true,
+      "rewardClaimed": false
+    },
+    {
+      "id": "BLACKJACK_DEALER",
+      "roomId": 4,
+      "row": 3,
+      "column": 2,
+      "currentHealth": 0,
+      "alive": false,
+      "rewardClaimed": true
+    },
+    {
+      "id": "AGGRESSIVE_DRUNK",
+      "roomId": 5,
+      "row": 4,
+      "column": 3,
+      "currentHealth": 0,
+      "alive": false,
+      "rewardClaimed": true
+    },
+    {
+      "id": "RUSSIAN_MAFIA",
+      "roomId": 7,
+      "row": 3,
+      "column": 3,
+      "currentHealth": 0,
+      "alive": false,
+      "rewardClaimed": true
+    },
+    {
+      "id": "VIP_THUG",
+      "roomId": 7,
+      "row": 2,
+      "column": 3,
+      "currentHealth": 0,
+      "alive": false,
+      "rewardClaimed": true
+    }
+  ],
+  "collectedObjectIds": [
+    "BROKEN_BOTTLE",
+    "SHARP_CARDS",
+    "REVITALIZING_SHOT"
+  ],
   "doors": [
-    { "fromRoomId": 2, "toRoomId": 3, "locked": true }
+    {
+      "fromRoomId": 2,
+      "toRoomId": 3,
+      "locked": true
+    }
   ],
   "treasuryKeyBought": false,
-  "log": []
+  "log": [
+    {
+      "turn": -1,
+      "message": "Objeto recogido: Botella rota"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 3,4"
+    },
+    {
+      "turn": -1,
+      "message": "NPC bienvenida: Bienvenido al Casino Fortuna. Si buscas a tu amigo, pregunta en el bar... si sobrevives."
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 3,1"
+    },
+    {
+      "turn": -1,
+      "message": "Cambio de sala 1 -\u003e 4"
+    },
+    {
+      "turn": -1,
+      "message": "Crupier de Blackjack se mueve a 2,2"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 2,4"
+    },
+    {
+      "turn": -1,
+      "message": "Objeto recogido: Baraja afilada"
+    },
+    {
+      "turn": -1,
+      "message": "Crupier de Blackjack se mueve a 2,3"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 2,5"
+    },
+    {
+      "turn": -1,
+      "message": "Arma equipada: Baraja afilada"
+    },
+    {
+      "turn": -1,
+      "message": "Crupier de Blackjack se mueve a 2,4"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Crupier de Blackjack: 0 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Crupier de Blackjack ataca al jugador: 1 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Crupier de Blackjack: 1 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Crupier de Blackjack ataca al jugador: 2 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Crupier de Blackjack: 8 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Crupier de Blackjack ataca al jugador: 4 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Crupier de Blackjack: 4 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Crupier de Blackjack ataca al jugador: 5 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Crupier de Blackjack: 16 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Enemigo derrotado: Crupier de Blackjack"
+    },
+    {
+      "turn": -1,
+      "message": "Fichas ganadas: 15"
+    },
+    {
+      "turn": -1,
+      "message": "Objeto obtenido por drop: Traje con escudo"
+    },
+    {
+      "turn": -1,
+      "message": "Armadura equipada: Traje con escudo"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 3,5"
+    },
+    {
+      "turn": -1,
+      "message": "Cambio de sala 4 -\u003e 5"
+    },
+    {
+      "turn": -1,
+      "message": "Borracho Agresivo se mueve a 4,2"
+    },
+    {
+      "turn": -1,
+      "message": "NPC especial del bar entrega Pastilla de dudosa procedencia"
+    },
+    {
+      "turn": -1,
+      "message": "Borracho Agresivo se mueve a 3,2"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 2,2"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Borracho Agresivo: 1 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Borracho Agresivo ataca al jugador: 0 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Borracho Agresivo: 5 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Borracho Agresivo ataca al jugador: 0 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Borracho Agresivo: 3 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Borracho Agresivo ataca al jugador: 0 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Borracho Agresivo: 2 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Borracho Agresivo ataca al jugador: 2 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Borracho Agresivo: 14 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Enemigo derrotado: Borracho Agresivo"
+    },
+    {
+      "turn": -1,
+      "message": "Fichas ganadas: 12"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 5,2"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 6,2"
+    },
+    {
+      "turn": -1,
+      "message": "Cambio de sala 5 -\u003e 6"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 4,5"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 4,3"
+    },
+    {
+      "turn": -1,
+      "message": "Objeto recogido: Chupito revitalizante"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 4,2"
+    },
+    {
+      "turn": -1,
+      "message": "Amigo rescatado"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 4,4"
+    },
+    {
+      "turn": -1,
+      "message": "Acompanante peligrosa drena 3 de vida"
+    },
+    {
+      "turn": -1,
+      "message": "Trampa activada en 3,4: 3 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 3,4"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 3,5"
+    },
+    {
+      "turn": -1,
+      "message": "Cambio de sala 6 -\u003e 5"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 3,2"
+    },
+    {
+      "turn": -1,
+      "message": "Compra en tienda: Chaleco de portero por 25 fichas"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 4,4"
+    },
+    {
+      "turn": -1,
+      "message": "Objeto usado: Chupito revitalizante"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 4,6"
+    },
+    {
+      "turn": -1,
+      "message": "Cambio de sala 5 -\u003e 7"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso se mueve a 3,2"
+    },
+    {
+      "turn": -1,
+      "message": "Maton VIP se mueve a 2,2"
+    },
+    {
+      "turn": -1,
+      "message": "Armadura equipada: Chaleco de portero"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso se mueve a 3,3"
+    },
+    {
+      "turn": -1,
+      "message": "Maton VIP se mueve a 2,1"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Maton VIP: 3 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso se mueve a 2,3"
+    },
+    {
+      "turn": -1,
+      "message": "Maton VIP ataca al jugador: 0 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Maton VIP: 13 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso se mueve a 1,3"
+    },
+    {
+      "turn": -1,
+      "message": "Maton VIP ataca al jugador: 0 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Maton VIP: 11 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Enemigo derrotado: Maton VIP"
+    },
+    {
+      "turn": -1,
+      "message": "Fichas ganadas: 10"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso se mueve a 2,3"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 2,2"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Mafioso Ruso: 9 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso ataca al jugador: 2 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Mafioso Ruso: 6 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso ataca al jugador: 1 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Mafioso Ruso: 6 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso ataca al jugador: 5 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Mafioso Ruso: 7 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Mafioso Ruso ataca al jugador: 4 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Ataque a Mafioso Ruso: 11 de dano"
+    },
+    {
+      "turn": -1,
+      "message": "Enemigo derrotado: Mafioso Ruso"
+    },
+    {
+      "turn": -1,
+      "message": "Fichas ganadas: 35"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 2,5"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 2,6"
+    },
+    {
+      "turn": -1,
+      "message": "Cambio de sala 7 -\u003e 8"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 1,2"
+    },
+    {
+      "turn": -1,
+      "message": "Movimiento del jugador a 1,3"
+    },
+    {
+      "turn": -1,
+      "message": "Has escapado del casino con tu amigo. Victoria."
+    }
+  ]
 }

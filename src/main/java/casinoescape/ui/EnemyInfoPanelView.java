@@ -16,11 +16,18 @@ public class EnemyInfoPanelView {
     private final Label hint = new Label("Click en un enemigo para ver sus datos.");
 
     public EnemyInfoPanelView() {
-        root.setStyle("-fx-padding: 12; -fx-border-color: #d4af37; -fx-border-width: 3; -fx-background-color: #fff8df;");
-        Label title = new Label("Mesa de enemigos");
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5c2300;");
+        root.setStyle("-fx-padding: 12; -fx-border-color: #9E1B1B, #D4AF37; -fx-border-width: 2, 3; -fx-background-color: #FFF4D6;");
+        Label title = new Label("♥ Mesa de enemigos");
+        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5A1717;");
+        styleInfoLabel(name);
+        styleInfoLabel(health);
+        styleInfoLabel(attack);
+        styleInfoLabel(defense);
+        styleInfoLabel(movement);
         hint.setWrapText(true);
         reward.setWrapText(true);
+        reward.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #8C6A21;");
+        hint.setStyle("-fx-font-size: 12; -fx-text-fill: #4A4030;");
         root.getChildren().addAll(title, name, health, attack, defense, movement, reward, hint);
     }
 
@@ -40,12 +47,17 @@ public class EnemyInfoPanelView {
             return;
         }
         name.setText("Enemigo: " + enemy.getName());
-        health.setText("Vida: " + enemy.getCurrentHealth() + "/" + enemy.getMaxHealth());
-        attack.setText("Ataque: " + enemy.getAttack());
-        defense.setText("Defensa/Escudo: " + enemy.getDefense());
+        health.setText("♥ Vida: " + enemy.getCurrentHealth() + "/" + enemy.getMaxHealth());
+        attack.setText("♦ Ataque: " + enemy.getAttack());
+        defense.setText("♣ Escudo: " + enemy.getDefense());
         movement.setText("Movimiento: aproximacion por BFS");
         reward.setText("Recompensa: " + formatReward(enemy));
         hint.setText("Ver estadisticas no consume accion. Para combatir usa el boton Atacar.");
+    }
+
+    private void styleInfoLabel(Label label) {
+        label.setWrapText(true);
+        label.setStyle("-fx-font-size: 13; -fx-text-fill: #17130A;");
     }
 
     private String formatReward(Enemy enemy) {

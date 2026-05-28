@@ -2,7 +2,6 @@ package casinoescape.ui;
 
 import casinoescape.game.Game;
 import casinoescape.movement.ShortestPathInfo;
-import casinoescape.model.CasinoMap;
 import casinoescape.structures.MyLinkedList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -12,21 +11,24 @@ public class RoutePanelView {
     private final VBox root = new VBox(6);
     private final Label currentRoom = new Label();
     private final Label connections = new Label();
-    private final Label minimap = new Label();
     private final Label route = new Label();
     private final Label roomDistance = new Label();
     private final Label nextRoom = new Label();
     private final Label cellDistance = new Label();
 
     public RoutePanelView() {
-        root.setStyle("-fx-padding: 12; -fx-border-color: #d4af37; -fx-border-width: 3; -fx-background-color: #f4fff8;");
-        Label title = new Label("Plano del casino");
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #064f36;");
+        root.setStyle("-fx-padding: 12; -fx-border-color: #D4AF37; -fx-border-width: 3; -fx-background-color: #0B3D2E;");
+        Label title = new Label("♣ Plano del casino");
+        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #F6D36B;");
         route.setWrapText(true);
         connections.setWrapText(true);
-        minimap.setWrapText(true);
-        minimap.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12; -fx-background-color: #fff8df; -fx-border-color: #d4af37; -fx-border-width: 1; -fx-padding: 6;");
-        root.getChildren().addAll(title, currentRoom, connections, minimap, route, roomDistance, nextRoom, cellDistance);
+        styleInfoLabel(currentRoom);
+        styleInfoLabel(connections);
+        styleInfoLabel(roomDistance);
+        styleInfoLabel(nextRoom);
+        styleInfoLabel(cellDistance);
+        route.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #F2C94C;");
+        root.getChildren().addAll(title, currentRoom, connections, route, nextRoom, roomDistance, cellDistance);
     }
 
     public Node getNode() {
@@ -36,12 +38,16 @@ public class RoutePanelView {
     public void refresh(Game game, ShortestPathInfo info) {
         currentRoom.setText("Sala actual: " + game.getCurrentRoom().getId() + " - " + game.getCurrentRoom().getName());
         connections.setText("Conexiones: " + formatPath(game.getMap().getConnectedRooms(game.getCurrentRoom().getId())));
-        minimap.setText(formatMinimap(game));
         route.setText("Ruta recomendada: " + formatPath(info.getRoomPath()));
         roomDistance.setText("Distancia salas: " + formatDistance(info.getRoomDistance()));
         nextRoom.setText("Siguiente sala: " + (info.getRecommendedNextRoomId() == ShortestPathInfo.NO_RECOMMENDED_ROOM
                 ? "salida/actual" : String.valueOf(info.getRecommendedNextRoomId())));
         cellDistance.setText("Distancia puerta/salida: " + formatDistance(info.getCellDistance()));
+    }
+
+    private void styleInfoLabel(Label label) {
+        label.setWrapText(true);
+        label.setStyle("-fx-font-size: 13; -fx-text-fill: #FFF4D6;");
     }
 
     private String formatPath(MyLinkedList<Integer> path) {
@@ -55,22 +61,6 @@ public class RoutePanelView {
             }
             builder.append(path.get(i));
         }
-        return builder.toString();
-    }
-
-    private String formatMinimap(Game game) {
-        StringBuilder builder = new StringBuilder("Mapa textual:");
-        int currentRoomId = game.getCurrentRoom().getId();
-        for (int roomId = 1; roomId <= game.getMap().getRoomCount(); roomId++) {
-            builder.append(System.lineSeparator());
-            if (roomId == currentRoomId) {
-                builder.append("[").append(roomId).append("]");
-            } else {
-                builder.append(roomId);
-            }
-            builder.append(" -> ").append(formatPath(game.getMap().getConnectedRooms(roomId)));
-        }
-        builder.append(System.lineSeparator()).append(CasinoMap.EXIT_ROOM_ID).append(" -> SALIDA");
         return builder.toString();
     }
 

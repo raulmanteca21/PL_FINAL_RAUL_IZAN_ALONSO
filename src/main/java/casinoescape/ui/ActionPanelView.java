@@ -7,6 +7,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 
 public class ActionPanelView {
+    private static final String DISABLED_STYLE = "-fx-background-color: #333333; -fx-text-fill: #8A8A8A; -fx-font-weight: bold; -fx-border-color: #555555; -fx-border-width: 1; -fx-padding: 6 8 6 8;";
+
     private final FlowPane root = new FlowPane(8, 8);
     private final Button endTurn = new Button("Finalizar turno");
     private final Button attack = new Button("Atacar");
@@ -24,7 +26,7 @@ public class ActionPanelView {
     private final Button replay = new Button("Volver a jugar");
 
     public ActionPanelView() {
-        root.setStyle("-fx-padding: 10; -fx-background-color: #141414; -fx-border-color: #d4af37; -fx-border-width: 2 0 0 0;");
+        root.setStyle("-fx-padding: 10; -fx-background-color: #141414; -fx-border-color: #D4AF37; -fx-border-width: 2 0 0 0;");
         endTurn.setTooltip(new Tooltip("Termina tu turno y deja actuar a los enemigos"));
         attack.setTooltip(new Tooltip("Requiere enemigo adyacente. No se activa al hacer click en el enemigo"));
         pickItem.setTooltip(new Tooltip("Requiere objeto adyacente"));
@@ -40,17 +42,35 @@ public class ActionPanelView {
         load.setTooltip(new Tooltip("Carga la partida guardada"));
         replay.setTooltip(new Tooltip("Inicia una nueva partida desde config/game_config.json"));
         styleActionButtons();
-        replay.setStyle("-fx-background-color: #d4af37; -fx-text-fill: #141414; -fx-font-weight: bold; -fx-border-color: #fff8df; -fx-border-width: 2;");
+        replay.setStyle(style("#F6D36B", "#5A1717", "#9E1B1B", 2));
         replay.setVisible(false);
         replay.setManaged(false);
         root.getChildren().addAll(endTurn, attack, pickItem, lineMove, interact, useDoor, useItem, equipWeapon, equipArmor, shop, roulette, save, load, replay);
     }
 
     private void styleActionButtons() {
-        Button[] buttons = {endTurn, attack, pickItem, lineMove, interact, useDoor, useItem, equipWeapon, equipArmor, shop, roulette, save, load};
-        for (Button button : buttons) {
-            button.setStyle("-fx-background-color: #fff8df; -fx-text-fill: #141414; -fx-font-weight: bold; -fx-border-color: #d4af37; -fx-border-width: 1;");
-        }
+        endTurn.setStyle(style("#1F7A3A", "#FFF4D6", "#D4AF37", 1));
+        attack.setStyle(style("#9E1B1B", "#FFF4D6", "#D4AF37", 1));
+        pickItem.setStyle(style("#FFF4D6", "#17130A", "#D4AF37", 1));
+        lineMove.setStyle(style("#4FD06B", "#111111", "#D4AF37", 1));
+        interact.setStyle(style("#FFF4D6", "#17130A", "#D4AF37", 1));
+        useDoor.setStyle(style("#2F6F9F", "#FFF4D6", "#D4AF37", 1));
+        useItem.setStyle(style("#FFF4D6", "#17130A", "#D4AF37", 1));
+        equipWeapon.setStyle(style("#FFF4D6", "#17130A", "#D4AF37", 1));
+        equipArmor.setStyle(style("#FFF4D6", "#17130A", "#D4AF37", 1));
+        shop.setStyle(style("#F2C94C", "#111111", "#D4AF37", 1));
+        roulette.setStyle(style("#6C4AB6", "#FFF4D6", "#D4AF37", 1));
+        save.setStyle(style("#D4AF37", "#111111", "#FFF4D6", 1));
+        load.setStyle(style("#B88A2A", "#111111", "#FFF4D6", 1));
+    }
+
+    private String style(String background, String text, String border, int borderWidth) {
+        return "-fx-background-color: " + background + ";"
+                + "-fx-text-fill: " + text + ";"
+                + "-fx-font-weight: bold;"
+                + "-fx-border-color: " + border + ";"
+                + "-fx-border-width: " + borderWidth + ";"
+                + "-fx-padding: 6 8 6 8;";
     }
 
     public Node getNode() {
@@ -78,6 +98,26 @@ public class ActionPanelView {
         boolean shopAvailable = !finished && game.canUseAdjacentShop();
         boolean rouletteAvailable = !finished && game.canPlayAdjacentMinigame();
         lineMove.setText(lineMovementAvailable ? "Movimiento linea" : "Requiere Pastilla");
+        styleActionButtons();
+        if (!lineMovementAvailable) {
+            lineMove.setStyle(DISABLED_STYLE);
+        }
+        if (!shopAvailable) {
+            shop.setStyle(DISABLED_STYLE);
+        }
+        if (!rouletteAvailable) {
+            roulette.setStyle(DISABLED_STYLE);
+        }
+        if (finished) {
+            endTurn.setStyle(DISABLED_STYLE);
+            attack.setStyle(DISABLED_STYLE);
+            pickItem.setStyle(DISABLED_STYLE);
+            interact.setStyle(DISABLED_STYLE);
+            useDoor.setStyle(DISABLED_STYLE);
+            useItem.setStyle(DISABLED_STYLE);
+            equipWeapon.setStyle(DISABLED_STYLE);
+            equipArmor.setStyle(DISABLED_STYLE);
+        }
         endTurn.setDisable(finished);
         attack.setDisable(finished);
         pickItem.setDisable(finished);

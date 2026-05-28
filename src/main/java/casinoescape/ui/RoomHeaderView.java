@@ -1,6 +1,7 @@
 package casinoescape.ui;
 
 import casinoescape.model.Room;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -10,8 +11,9 @@ public class RoomHeaderView {
     private final Label roomTitle = new Label();
 
     public RoomHeaderView() {
-        root.setStyle("-fx-padding: 10; -fx-background-color: #fff8df; -fx-border-color: #d4af37; -fx-border-width: 3;");
-        roomTitle.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #5c2300;");
+        root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-padding: 12; -fx-background-color: #6E1B1B; -fx-border-color: #D4AF37; -fx-border-width: 4;");
+        roomTitle.setStyle("-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #F6D36B;");
         root.getChildren().add(roomTitle);
     }
 
@@ -20,6 +22,6 @@ public class RoomHeaderView {
     }
 
     public void refresh(Room room) {
-        roomTitle.setText("Sala " + room.getId() + " - " + room.getName());
+        roomTitle.setText("♠ ♥ ♦ ♣  SALA " + room.getId() + " - " + room.getName().toUpperCase() + "  ♣ ♦ ♥ ♠");
     }
 }

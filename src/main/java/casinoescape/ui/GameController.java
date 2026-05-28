@@ -52,16 +52,16 @@ public class GameController {
 
     public Parent createView() {
         BorderPane root = new BorderPane();
-        root.setPadding(new Insets(14));
-        root.setStyle("-fx-background-color: #0b2f24;");
+        root.setPadding(new Insets(16));
+        root.setStyle("-fx-background-color: #06281F;");
 
-        VBox leftPanel = new VBox(12, playerPanelView.getNode(), inventoryPanelView.getNode());
+        VBox leftPanel = new VBox(14, playerPanelView.getNode(), inventoryPanelView.getNode());
         leftPanel.setPrefWidth(245);
 
-        VBox rightPanel = new VBox(12, routePanelView.getNode(), enemyInfoPanelView.getNode(), logPanelView.getNode());
+        VBox rightPanel = new VBox(14, routePanelView.getNode(), enemyInfoPanelView.getNode(), logPanelView.getNode());
         rightPanel.setPrefWidth(300);
 
-        VBox centerPanel = new VBox(10, roomHeaderView.getNode(), roomGridView.getNode());
+        VBox centerPanel = new VBox(12, roomHeaderView.getNode(), roomGridView.getNode());
 
         root.setLeft(leftPanel);
         root.setCenter(centerPanel);

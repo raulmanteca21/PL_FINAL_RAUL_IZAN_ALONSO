@@ -15,10 +15,15 @@ public class InventoryPanelView {
     private Inventory inventory;
 
     public InventoryPanelView() {
-        root.setStyle("-fx-padding: 12; -fx-border-color: #d4af37; -fx-border-width: 3; -fx-background-color: #fff8df;");
-        Label title = new Label("Caja de fichas");
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5c2300;");
+        root.setStyle("-fx-padding: 12; -fx-border-color: #D4AF37; -fx-border-width: 3; -fx-background-color: #FFF4D6;");
+        Label title = new Label("♦ Caja de fichas");
+        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #5A1717;");
+        equippedWeapon.setWrapText(true);
+        equippedArmor.setWrapText(true);
+        equippedWeapon.setStyle("-fx-font-size: 13; -fx-text-fill: #17130A;");
+        equippedArmor.setStyle("-fx-font-size: 13; -fx-text-fill: #17130A;");
         items.setPrefHeight(170);
+        items.setStyle("-fx-control-inner-background: #FFFDF2; -fx-border-color: #B88A2A; -fx-border-width: 1; -fx-font-size: 12;");
         root.getChildren().addAll(title, equippedWeapon, equippedArmor, items);
     }
 
@@ -37,8 +42,8 @@ public class InventoryPanelView {
                 items.getSelectionModel().select(i);
             }
         }
-        equippedWeapon.setText("Arma: " + (inventory.getEquippedWeapon() == null ? "ninguna" : inventory.getEquippedWeapon().getName()));
-        equippedArmor.setText("Armadura: " + (inventory.getEquippedArmor() == null ? "ninguna" : inventory.getEquippedArmor().getName()));
+        equippedWeapon.setText("Arma activa: " + (inventory.getEquippedWeapon() == null ? "ninguna" : inventory.getEquippedWeapon().getName()));
+        equippedArmor.setText("Armadura activa: " + (inventory.getEquippedArmor() == null ? "ninguna" : inventory.getEquippedArmor().getName()));
     }
 
     private String formatItem(Item item, Inventory inventory) {
